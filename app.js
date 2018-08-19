@@ -1,4 +1,4 @@
-import Game from './src/game'
+import Game from './game'
 
 
 function init() {

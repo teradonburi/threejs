@@ -1,23 +1,21 @@
-/* global THREE: false */
-import Render from './Render'
-import Scene from './Scene'
-import Clock from './Clock'
-import Vector3 from './Vector3'
-import Axis from './Axis'
-import Grid from './Grid'
-import Camera from './Camera'
-import DirectionalLight from './DirectionalLight'
-import AmbientLight from './AmbientLight'
-import Loader from './Loader'
-import HeightMap from './HeightMap'
-import Sphere from './Sphere'
-import Box from './Box'
-import Cylinder from './Cylinder'
-import Cone from './Cone'
-import SkinnedMesh from './SkinnedMesh'
-import GLTFModel from './GLTFModel'
-import PhysicsWorld from './PhysicsWorld'
-import DragControls from './DragControls'
+import Render from './src/Render'
+import Scene from './src//Scene'
+import Clock from './src//Clock'
+import Vector3 from './src//Vector3'
+import Axis from './src//Axis'
+import Grid from './src//Grid'
+import Camera from './src//Camera'
+import DirectionalLight from './src//DirectionalLight'
+import AmbientLight from './src//AmbientLight'
+import Loader from './src//Loader'
+import HeightMap from './src//HeightMap'
+import Sphere from './src//Sphere'
+import Box from './src//Box'
+import Cylinder from './src//Cylinder'
+import Cone from './src//Cone'
+import GLTFModel from './src//GLTFModel'
+import PhysicsWorld from './src//PhysicsWorld'
+import DragControls from './src//DragControls'
 
 export default class Game {
 
@@ -42,7 +40,7 @@ export default class Game {
     const debugEye = new Vector3(100, 200, 200)
     const debugLookAt = new Vector3(0, 0, 0)
     this.controlCamera = new Camera(debugEye, debugLookAt, 1, 4000)
-    this.controls = this.controlCamera.getControls()
+    this.controlCamera.controls = this.controlCamera.getControls()
 
     this.light = new DirectionalLight()
     this.ambient = new AmbientLight()
@@ -70,19 +68,11 @@ export default class Game {
 
     const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
     this.model = new GLTFModel(gltf)
-    this.model.object.position.set(50, 10, 0)
-    this.model.object.scale.set(5, 5, 5)
-    const animations = gltf.animations
-    if (animations && animations.length) {
-      this.CesiumMan.mixer = new THREE.AnimationMixer(this.CesiumMan)
-      const actions = []
-      for (let i = 0; i < animations.length; i ++) {
-        const animation = animations[ i ]
-        actions.push(this.CesiumMan.mixer.clipAction(animation))
-      }
-      actions[0].play()
-    }
-    this.scene.add(this.CesiumMan)
+    this.model.position.set(50, 10, 0)
+    this.model.scale.set(5, 5, 5)
+    this.model.actions[0].play()
+    this.scene.add(this.model)
+    // this.physicsWorld.addRigidBody(this.model.userData.physicsBody)
 
     this.heightMap = new HeightMap()
     this.scene.add(this.heightMap)
@@ -115,36 +105,44 @@ export default class Game {
 
   render = () => {
     const {delta, time} = this.clock.update()
-    this.SkinnedMesh.mixer.update(delta)
-    this.CesiumMan.mixer && this.CesiumMan.mixer.update(delta)
+    this.model.mixer && this.model.mixer.update(delta)
 
     if (this.physicsWorld.dynamicObjects.length < 5 && time > this.timeNextSpawn) {
       const objectType = Math.ceil(Math.random() * 4)
       let mesh = null
       const initPos = new Vector3(0, 100, 0)
+      const objectSize = 3
       switch (objectType) {
         case 1:
-          mesh = new Sphere(initPos)
+          mesh = new Sphere(1 + Math.random() * objectSize)
+          mesh.position.set(initPos.x, initPos.y, initPos.z)
+          this.physicsWorld.addSphereBody(mesh, mesh.radius, objectSize * 5)
           break
         case 2:
-          mesh = new Box(initPos)
+          mesh = new Box(new Vector3(1 + Math.random() * objectSize, 1 + Math.random() * objectSize, 1 + Math.random() * objectSize))
+          mesh.position.set(initPos.x, initPos.y, initPos.z)
+          this.physicsWorld.addBoxBody(mesh, mesh.size, objectSize * 5)
           break
         case 3:
-          mesh = new Cylinder(initPos)
+          mesh = new Cylinder(1 + Math.random() * objectSize, 2 + Math.random() * objectSize)
+          mesh.position.set(initPos.x, initPos.y, initPos.z)
+          this.physicsWorld.addCylinderBody(mesh, mesh.radius, mesh.height, objectSize * 5)
           break
         default:
-          mesh = new Cone(initPos)
+          mesh = new Cone(1 + Math.random() * objectSize, 2 + Math.random() * objectSize)
+          mesh.position.set(initPos.x, initPos.y, initPos.z)
+          this.physicsWorld.addConeBody(mesh, mesh.radius, mesh.height, objectSize * 5)
           break
       }
 
       this.scene.add(mesh)
       this.physicsWorld.dynamicObjects.push(mesh)
-      this.physicsWorld.addRigidBody(mesh.userData.physicsBody)
       this.timeNextSpawn = time + this.objectTimePeriod
     }
     this.physicsWorld.update(delta)
-    this.SkinnedMesh.updatePhysics()
-    this.controls.update()
+    this.physicsWorld.updateDynamicObjectsModelPose()
+    // this.model.updatePhysics()
+    this.controlCamera.controls.update()
     this.renderer.render(this.scene, this.controlCamera)
   }
 }

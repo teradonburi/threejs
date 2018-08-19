@@ -29,9 +29,7 @@ export default class HeightMap {
     let p = 0
     for (let j = 0; j < depth; j++) {
       for (let i = 0; i < width; i++) {
-        const radius = Math.sqrt(
-										Math.pow((i - w2) / w2, 2.0) +
-										Math.pow((j - d2) / d2, 2.0))
+        const radius = Math.sqrt(Math.pow((i - w2) / w2, 2.0) + Math.pow((j - d2) / d2, 2.0))
         const height = (Math.sin(radius * phaseMult) + 1) * 0.5 * hRange + minHeight
         data[p] = height
         p++
