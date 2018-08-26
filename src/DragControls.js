@@ -15,11 +15,11 @@ export default class DragControls {
     dragControls.addEventListener('dragend', (e) => {
 
       if (e.object.userData && e.object.userData.physicsBody) {
+        const pos = e.object.position
+        const q = e.object.quaternion
         const objPhys = e.object.userData.physicsBody
         const transform = new Ammo.btTransform()
         transform.setIdentity()
-        const pos = e.object.position
-        const q = e.object.quaternion
         transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z))
         transform.setRotation(new Ammo.btQuaternion(q.x, q.y, q.z, q.w))
         const motionState = new Ammo.btDefaultMotionState(transform)

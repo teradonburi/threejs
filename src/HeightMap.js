@@ -6,8 +6,8 @@ export default class HeightMap {
     // Heightfield parameters
     this.terrainWidth = 128
     this.terrainDepth = 128
-    this.terrainMaxHeight = 8
-    this.terrainMinHeight = -2
+    this.terrainMaxHeight = 5
+    this.terrainMinHeight = 0
     this.terrainWidthExtents = 100
     this.terrainDepthExtents = 100
     this.heightData = this.generateHeight(this.terrainWidth, this.terrainDepth, this.terrainMinHeight, this.terrainMaxHeight)

@@ -18,6 +18,10 @@ module.exports = {
       'three/OrbitControls': path.join(__dirname, 'node_modules/three/examples/js/controls/OrbitControls.js'),
       // GLTF
       'three/GLTFLoader': path.join(__dirname, 'node_modules/three/examples/js/loaders/GLTFLoader.js'),
+      // Convex
+      'three/QuickHull': path.join(__dirname, 'node_modules/three/examples/js/QuickHull.js'),
+      'three/Convex': path.join(__dirname, 'node_modules/three/examples/js/geometries/ConvexGeometry.js'),
+      // DracoLoader
       'three/Draco': path.join(__dirname, 'node_modules/three/examples/js/loaders/DRACOLoader.js'),
     },
     extensions: [
