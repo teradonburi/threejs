@@ -8,9 +8,7 @@ export default class PhysicsWorld {
     const solver = new Ammo.btSequentialImpulseConstraintSolver()
     this.physicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
     this.physicsWorld.setGravity(gravity)
-    this.physicsWorld.dynamicObjects = []
     this.physicsWorld.update = this.update
-    this.physicsWorld.updateDynamicObjectsModelPose = this.updateDynamicObjectsModelPose
     this.physicsWorld.addSphereBody = this.addSphereBody
     this.physicsWorld.addBoxBody = this.addBoxBody
     this.physicsWorld.addCylinderBody = this.addCylinderBody
@@ -28,16 +26,6 @@ export default class PhysicsWorld {
   // 物理世界のシミュレーションを更新する（重力計算、衝突計算など）
   update = (deltaTime) => {
     this.physicsWorld.stepSimulation(deltaTime, 10)
-  }
-
-  updateDynamicObjectsModelPose = () => {
-    for (let i = 0; i < this.physicsWorld.dynamicObjects.length; i++) {
-      const objThree = this.physicsWorld.dynamicObjects[ i ]
-      if (objThree.userData && objThree.userData.ignorePhysics) {
-        continue
-      }
-      this.setModelPose(objThree)
-    }
   }
 
   addSphereBody = (objThree, radius, mass) => {
@@ -150,7 +138,9 @@ export default class PhysicsWorld {
 
   addHumanBody = (objThree, scale = 1, friction = 1, mass = 200) => {
     this.addCapsuleBody(objThree, (objThree.size.x ** 2 + objThree.size.z ** 2) ** 0.5 * 0.5 * scale, objThree.size.y, mass)
+    // 回転させない
     objThree.userData.physicsBody.setAngularFactor(0, 1, 0)
+    // 摩擦（登れる坂の傾斜に影響）
     objThree.userData.physicsBody.setFriction(friction)
   }
 
@@ -254,7 +244,6 @@ export default class PhysicsWorld {
         hits.push({a: objA.ptr, b: objB.ptr})
       }
     }
-
 
     return hits
   }

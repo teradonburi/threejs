@@ -92,9 +92,29 @@ export default class Game {
     this.timeNextSpawn = this.objectTimePeriod
 
     // ドラッグ処理
-    this.dragControls = new DragControls(this.physicsWorld.dynamicObjects, this.controlCamera, this.renderer)
+    this.dynamicObjects = []
+    this.dragControls = new DragControls(this.dynamicObjects, this.controlCamera, this.renderer, this.onDragStart, this.onDragEnd)
 
     this.loop()
+  }
+
+  onDragStart = (e) => {
+    if (this.controlCamera.controls) {
+      this.controlCamera.controls.enabled = false
+    }
+    if (e.object.userData) {
+      e.object.userData.ignorePhysics = true
+    }
+  }
+
+  onDragEnd = (e) => {
+    if (e.object.userData) {
+      this.physicsWorld.setPhysicsPose(e.object)
+      e.object.userData.ignorePhysics = false
+    }
+    if (this.controlCamera.controls) {
+      this.controlCamera.controls.enabled = true
+    }
   }
 
   loop = () => {
@@ -116,7 +136,7 @@ export default class Game {
     const {delta, time} = this.clock.update()
     this.model.mixer && this.model.mixer.update(delta)
 
-    if (this.physicsWorld.dynamicObjects.length < 5 && time > this.timeNextSpawn) {
+    if (this.dynamicObjects.length < 5 && time > this.timeNextSpawn) {
       const objectType = Math.ceil(Math.random() * 4)
       let mesh = null
       const initPos = new Vec3(0, 100, 0)
@@ -145,7 +165,7 @@ export default class Game {
       }
 
       this.scene.add(mesh)
-      this.physicsWorld.dynamicObjects.push(mesh)
+      this.dynamicObjects.push(mesh)
       this.timeNextSpawn = time + this.objectTimePeriod
     }
 
@@ -184,8 +204,14 @@ export default class Game {
       }
     }
 
+    for (let i = 0; i < this.dynamicObjects.length; i++) {
+      const objThree = this.dynamicObjects[ i ]
+      if (objThree.userData && objThree.userData.ignorePhysics) {
+        continue
+      }
+      this.physicsWorld.setModelPose(objThree)
+    }
 
-    this.physicsWorld.updateDynamicObjectsModelPose()
     this.physicsWorld.setModelPose(this.model)
     this.controlCamera.controls.update()
     this.renderer.clear()
