@@ -1,7 +1,7 @@
 /* global THREE: false, Ammo: false */
 
 export default class PhysicsWorld {
-  constructor (gravity = new Ammo.btVector3(0, -100.0, 0)) {
+  constructor (gravity = new Ammo.btVector3(0, -9.8, 0)) {
     const collisionConfiguration = new Ammo.btDefaultCollisionConfiguration()
     const dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration)
     const broadphase = new Ammo.btDbvtBroadphase()

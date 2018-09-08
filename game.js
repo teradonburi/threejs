@@ -70,7 +70,7 @@ export default class Game {
     this.sprite = new Sprite(texture)
 
     this.sprite.setPos(-1, 1, {right: true, bottom: true})
-    this.sprite.setSize(100)
+    this.sprite.setSize(50, 50)
     this.sceneOrtho.add(this.sprite)
 
     const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
@@ -168,12 +168,13 @@ export default class Game {
 
     const delay = 1
     if (this.isGround && time > (this.jumbTime || 0) + delay && this.keyboard.isPressSpace()) {
-      this.model.userData.physicsBody.applyCentralImpulse(new Ammo.btVector3(0, 20000, 0))
+      this.model.userData.physicsBody.applyCentralImpulse(new Ammo.btVector3(0, 5000, 0))
       this.isGround = false
       this.jumbTime = time
     }
-    this.physicsWorld.update(delta/2)
-    this.physicsWorld.update(delta/2)
+    this.model.userData.physicsBody.applyCentralForce(new Ammo.btVector3(0, -3000, 0))
+
+    this.physicsWorld.update(delta)
 
     // 物理空間上のオブジェクトの当たり判定
     const hitResult = this.physicsWorld.hitTest([this.heightMap, this.model])

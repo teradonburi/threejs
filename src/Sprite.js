@@ -7,11 +7,14 @@ export default class Sprite {
     this.sprite.x = 0
     this.sprite.y = 0
     this.sprite.center.set(0.5, 0.5)
-    this.sprite.scale.set(texture.image.width, texture.image.height, 1)
+    const screenAspect = window.innerWidth / window.innerHeight
+    this.sprite.initScreenAspect = screenAspect
+    this.sprite.scale.set(texture.image.width, texture.image.height * screenAspect, depth)
     this.sprite.depth = depth
     this.sprite.setPos = this.setPos
     this.sprite.setSize = this.setSize
     this.sprite.setDepth = this.setDepth
+    this.sprite.onResizeWindow = this.onResizeWindow
     return this.sprite
   }
 
@@ -34,8 +37,11 @@ export default class Sprite {
     this.sprite.position.set(width * x, height * y, this.sprite.depth)
   }
 
-  setSize = (size, aspect = 1) => {
-    this.sprite.scale.set(size, size * aspect, 1)
+  setSize = (w, h) => {
+    this.sprite.w = w
+    this.sprite.h = h
+    const screenAspect = window.innerWidth / window.innerHeight
+    this.sprite.scale.set(this.sprite.w, this.sprite.h * screenAspect / this.sprite.initScreenAspect, this.sprite.depth)
   }
 
   setDepth = (depth) => {
@@ -43,9 +49,8 @@ export default class Sprite {
   }
 
   onResizeWindow = () => {
-    const width = window.innerWidth / 2
-    const height = window.innerHeight / 2
-    this.sprite.position.set(width * this.sprite.x, height * this.sprite.y, this.sprite.depth)
+    const screenAspect = window.innerWidth / window.innerHeight
+    this.sprite.scale.set(this.sprite.w, this.sprite.h * screenAspect / this.sprite.initScreenAspect, this.sprite.depth)
   }
 
 }
