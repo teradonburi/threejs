@@ -15,7 +15,7 @@ export default class GLTFModel {
 
     if (traverse) {
       this.object.traverse((child) => {
-        if (child instanceof THREE.Mesh || child instanceof THREE.SkinnedMesh) {
+        if (child.isMesh) {
           const {vertices, faces, boundingBox, boundingSphere} = this.getVertices(child)
           this.object.vertices = vertices
           this.object.faces = faces
@@ -23,13 +23,32 @@ export default class GLTFModel {
           this.object.boundingSphere = boundingSphere
           this.object.boxHelper = new THREE.BoxHelper(child, 0xffff00)
         }
+        if (child.isMesh || child.isLight) {
+          child.castShadow = true
+        }
       })
     }
-
     this.object.receiveShadow = true
     this.object.castShadow = true
+    this.object.init = this.init
     this.object.getCenter = this.getCenter
+    this.maxSpeed = 0.2
+    this.speed = 0.05
+    this.velocity = new THREE.Vector3(0, 0, 0)
+    this.object.setSpeed = this.setSpeed
+    this.object.move = this.move
+    this.object.stop = this.stop
     return this.object
+  }
+
+
+  init = (pos, rotate, size) => {
+    this.initPos = pos
+    this.initRotate = rotate
+    this.initScale = new THREE.Vector3(size, size, size)
+    this.object.position.set(this.initPos.x, this.initPos.y, this.initPos.z)
+    this.object.scale.set(this.initScale.x, this.initScale.y, this.initScale.z)
+    this.object.rotation.set(0, this.initRotate, 0)
   }
 
   getCenter = () => {
@@ -40,6 +59,38 @@ export default class GLTFModel {
     box3.getSize(this.object.size)
     this.object.center = new THREE.Vector3(0, -this.object.size.y * 0.5, 0)
   }
+
+  setSpeed = (speed, maxSpeed) => {
+    this.speed = speed
+    this.maxSpeed = maxSpeed
+  }
+
+  move = (camera, radian) => {
+    let dir = new THREE.Vector3()
+    camera.getWorldDirection(dir)
+    dir.y = 0
+    const yAxis = new THREE.Vector3(0, 1, 0)
+    dir.normalize()
+
+    dir.applyAxisAngle(yAxis, radian)
+    const rotate = new THREE.Vector3()
+    rotate.copy(dir)
+    rotate.applyAxisAngle(yAxis, this.initRotate)
+    this.object.lookAt(new THREE.Vector3(this.object.position.x + rotate.x, this.object.position.y + rotate.y, this.object.position.z + rotate.z))
+    dir.multiplyScalar(this.speed)
+    if (this.velocity.length() < this.maxSpeed) {
+      this.velocity.x += dir.x
+      this.velocity.z += dir.z
+    }
+    this.object.position.x += this.velocity.x
+    this.object.position.z += this.velocity.z
+  }
+
+  stop = () => {
+    this.velocity.x = 0
+    this.velocity.z = 0
+  }
+
 
   getVertices = (obj) => {
     const vertices = []

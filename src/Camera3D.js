@@ -29,4 +29,5 @@ export default class Camera {
     this.camera.aspect = width / height
     this.camera.updateProjectionMatrix()
   }
+
 }

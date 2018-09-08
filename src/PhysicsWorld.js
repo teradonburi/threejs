@@ -1,7 +1,7 @@
 /* global THREE: false, Ammo: false */
 
 export default class PhysicsWorld {
-  constructor (gravity = new Ammo.btVector3(0, -30.0, 0)) {
+  constructor (gravity = new Ammo.btVector3(0, -100.0, 0)) {
     const collisionConfiguration = new Ammo.btDefaultCollisionConfiguration()
     const dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration)
     const broadphase = new Ammo.btDbvtBroadphase()
@@ -18,6 +18,10 @@ export default class PhysicsWorld {
     this.physicsWorld.addCapsuleBody = this.addCapsuleBody
     this.physicsWorld.addConvexBody = this.addConvexBody
     this.physicsWorld.addTriangleBody = this.addTriangleBody
+    this.physicsWorld.addHumanBody = this.addHumanBody
+    this.physicsWorld.setPhysicsPose = this.setPhysicsPose
+    this.physicsWorld.setModelPose = this.setModelPose
+    this.physicsWorld.hitTest = this.hitTest
     return this.physicsWorld
   }
 
@@ -32,7 +36,7 @@ export default class PhysicsWorld {
       if (objThree.userData && objThree.userData.ignorePhysics) {
         continue
       }
-      PhysicsWorld.setModelPose(objThree)
+      this.setModelPose(objThree)
     }
   }
 
@@ -40,8 +44,8 @@ export default class PhysicsWorld {
     const shape = new Ammo.btSphereShape(radius)
     shape.setMargin(0.05)
 
-    const transform = PhysicsWorld.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = PhysicsWorld.createBody(mass, transform, shape)
+    const transform = this.createTransform(objThree.position, objThree.quaternion)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
@@ -50,8 +54,8 @@ export default class PhysicsWorld {
     shape.setMargin(0.05)
 
     const pos = new THREE.Vector3(objThree.position.x, objThree.position.y, objThree.position.z)
-    const transform = PhysicsWorld.createTransform(pos, objThree.quaternion)
-    objThree.userData.physicsBody = PhysicsWorld.createBody(mass, transform, shape)
+    const transform = this.createTransform(pos, objThree.quaternion)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
@@ -59,8 +63,8 @@ export default class PhysicsWorld {
     const shape = new Ammo.btCylinderShape(new Ammo.btVector3(radius, height * 0.5, radius))
     shape.setMargin(0.05)
 
-    const transform = PhysicsWorld.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = PhysicsWorld.createBody(mass, transform, shape)
+    const transform = this.createTransform(objThree.position, objThree.quaternion)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
@@ -68,8 +72,8 @@ export default class PhysicsWorld {
     const shape = new Ammo.btConeShape(radius, height)
     shape.setMargin(0.05)
 
-    const transform = PhysicsWorld.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = PhysicsWorld.createBody(mass, transform, shape)
+    const transform = this.createTransform(objThree.position, objThree.quaternion)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
@@ -77,8 +81,8 @@ export default class PhysicsWorld {
     const shape = new Ammo.btCapsuleShape(radius, height * 0.5)
     shape.setMargin(0.05)
 
-    const transform = PhysicsWorld.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = PhysicsWorld.createBody(mass, transform, shape)
+    const transform = this.createTransform(objThree.position, objThree.quaternion)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
@@ -89,8 +93,8 @@ export default class PhysicsWorld {
       shape.addPoint(new Ammo.btVector3(vec.x, vec.y, vec.z))
     }
 
-    const transform = PhysicsWorld.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = PhysicsWorld.createBody(mass, transform, shape)
+    const transform = this.createTransform(objThree.position, objThree.quaternion)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
@@ -139,13 +143,19 @@ export default class PhysicsWorld {
       true
     )
 
-    const transform = PhysicsWorld.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = PhysicsWorld.createBody(mass, transform, shape)
+    const transform = this.createTransform(objThree.position, objThree.quaternion)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
+  addHumanBody = (objThree, scale = 1, friction = 1, mass = 200) => {
+    this.addCapsuleBody(objThree, (objThree.size.x ** 2 + objThree.size.z ** 2) ** 0.5 * 0.5 * scale, objThree.size.y, mass)
+    objThree.userData.physicsBody.setAngularFactor(0, 1, 0)
+    objThree.userData.physicsBody.setFriction(friction)
+  }
+
   // 物理世界の姿勢作成
-  static createTransform(pos = new THREE.Vector3(0, 0, 0), q = new THREE.Quaternion(0, 0, 0, 1)) {
+  createTransform = (pos = new THREE.Vector3(0, 0, 0), q = new THREE.Quaternion(0, 0, 0, 1)) => {
     const transform = new Ammo.btTransform()
     transform.setIdentity()
     transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z))
@@ -154,7 +164,7 @@ export default class PhysicsWorld {
   }
 
   // 物理世界の衝突オブジェクトを作成
-  static createBody(mass, transform, shape, isKinematic = false, isStatic = false) {
+  createBody = (mass, transform, shape, isKinematic = false, isStatic = false) => {
     const localInertia = new Ammo.btVector3(0, 0, 0)
     const isStaticOrKinematic = isStatic || isKinematic
     if (!isStaticOrKinematic) {
@@ -173,7 +183,7 @@ export default class PhysicsWorld {
   }
 
   // モデルの描画姿勢を物理世界の姿勢に反映
-  static setPhysicsPose(objThree) {
+  setPhysicsPose = (objThree) => {
     const objPhys = objThree.userData.physicsBody && objThree.userData.physicsBody
     if (objPhys) {
       const pos = objThree.position
@@ -193,7 +203,7 @@ export default class PhysicsWorld {
   }
 
   // 物理世界の姿勢をモデルの描画姿勢に反映
-  static setModelPose(objThree) {
+  setModelPose = (objThree) => {
     const ms = objThree.userData.physicsBody && objThree.userData.physicsBody.getMotionState()
     if (ms) {
       let transformAux1 = new Ammo.btTransform()
@@ -207,6 +217,46 @@ export default class PhysicsWorld {
         objThree.boxHelper.setFromObject(objThree)
       }
     }
+  }
+
+  // 物理空間上のオブジェクトの当たり判定
+  hitTest = (targets, needHitPoint = false) => {
+
+    const targetPtrs = {}
+    for (let key in targets) {
+      const target = targets[key]
+      if (!target.userData.physicsBody) continue
+      delete target.userData.hits
+      targetPtrs[target.userData.physicsBody.ptr] = {}
+    }
+
+    const hits = []
+    const numManifolds = this.physicsWorld.getDispatcher().getNumManifolds()
+    for (let i = 0; i < numManifolds; i++) {
+      const contactManifold = this.physicsWorld.getDispatcher().getManifoldByIndexInternal(i)
+      const objA = contactManifold.getBody0()
+      const objB = contactManifold.getBody1()
+      if (!targetPtrs[objA.ptr] || !targetPtrs[objB.ptr]) continue
+
+      if (needHitPoint) {
+        const numContacts = contactManifold.getNumContacts()
+        const pts = []
+        for (let j = 0; j < numContacts; j++) {
+          const pt = contactManifold.getContactPoint(j)
+          if (pt.getDistance() < 0) {
+            const ptA = pt.getPositionWorldOnA()
+            const ptB = pt.getPositionWorldOnB()
+            pts.push({a: ptA, b: ptB})
+          }
+        }
+        hits.push({a: objA.ptr, b: objB.ptr, pts})
+      } else {
+        hits.push({a: objA.ptr, b: objB.ptr})
+      }
+    }
+
+
+    return hits
   }
 
 }

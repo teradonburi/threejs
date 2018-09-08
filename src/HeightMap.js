@@ -4,12 +4,12 @@ export default class HeightMap {
 
   constructor () {
     // Heightfield parameters
-    this.terrainWidth = 128
-    this.terrainDepth = 128
-    this.terrainMaxHeight = 5
+    this.terrainWidth = 512
+    this.terrainDepth = 512
+    this.terrainMaxHeight = 10
     this.terrainMinHeight = 0
-    this.terrainWidthExtents = 100
-    this.terrainDepthExtents = 100
+    this.terrainWidthExtents = 200
+    this.terrainDepthExtents = 200
     this.heightData = this.generateHeight(this.terrainWidth, this.terrainDepth, this.terrainMinHeight, this.terrainMaxHeight)
     this.terrainMesh = this.createGeometry()
     this.terrainMesh.receiveShadow = true

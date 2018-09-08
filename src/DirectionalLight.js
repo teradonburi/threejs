@@ -1,7 +1,7 @@
 /* global THREE: false */
 
 export default class DirectionalLight {
-  constructor(direction = new THREE.Vector3(100, 100, 50), dLight = 200, color = 0xffffff, shadowMapSize = 1024) {
+  constructor(direction = new THREE.Vector3(100, 100, 50), dLight = 512, color = 0xffffff, shadowMapSize = 1024) {
     // lighting
     this.light = new THREE.DirectionalLight(color, 1)
     this.light.position.set(direction.x, direction.y, direction.z)
