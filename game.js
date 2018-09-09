@@ -1,4 +1,3 @@
-/* global Ammo: false */
 import Render from './src/Render'
 import Scene from './src/Scene'
 import Clock from './src/Clock'
@@ -22,6 +21,9 @@ import GLTFModel from './src/GLTFModel'
 import PhysicsWorld from './src/PhysicsWorld'
 import DragControls from './src/DragControls'
 import Keyboard from './src/Keyboard'
+import AudioListener from './src/AudioListener'
+import PositionalAudio from './src/PositionalAudio'
+import Audio from './src/Audio'
 
 export default class Game {
 
@@ -66,19 +68,33 @@ export default class Game {
     this.scene.add(this.axis)
 
     this.loader = new Loader()
+
+    // Audio
+    this.audioListener = new AudioListener()
+    this.buffer = await this.loader.loadAudio('./sounds/bgm_maoudamashii_cyber39.mp3')
+    this.bgm = new Audio(this.buffer, this.audioListener)
+    this.bgm.setLoop(true)
+    this.bgm.setVolume(0.1)
+    this.bgm.play()
+    this.soundBuffer = await this.loader.loadAudio('./sounds/ping_pong.mp3')
+    this.sound = new PositionalAudio(this.soundBuffer, this.audioListener)
+    this.sound.setVolume(10)
+
+    // Sprite
     const texture = await this.loader.loadTexture('./textures/book.png')
     this.sprite = new Sprite(texture)
-
     this.sprite.setPos(-1, 1, {right: true, bottom: true})
     this.sprite.setSize(50, 50)
     this.sceneOrtho.add(this.sprite)
 
+    // GLTF
     const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
     this.model = new GLTFModel(gltf, true)
     this.model.init(new Vec3(0, 40, 0), -Math.PI/2, 10)
     this.model.actions[0].play()
     this.scene.add(this.model)
     this.model.getCenter()
+    this.model.add(this.sound)
     this.physicsWorld.addHumanBody(this.model, 0.8)
     // this.scene.add(this.model.boxHelper)
     this.isGround = false
@@ -188,12 +204,14 @@ export default class Game {
 
     const delay = 1
     if (this.isGround && time > (this.jumbTime || 0) + delay && this.keyboard.isPressSpace()) {
-      this.model.userData.physicsBody.applyCentralImpulse(new Ammo.btVector3(0, 5000, 0))
+      this.physicsWorld.addImpulse(this.model, new Vec3(0, 8000, 0))
+      this.sound.play()
       this.isGround = false
       this.jumbTime = time
     }
-    this.model.userData.physicsBody.applyCentralForce(new Ammo.btVector3(0, -3000, 0))
+    this.physicsWorld.addForce(this.model, new Vec3(0, -3000, 0))
 
+    // 物理計算更新
     this.physicsWorld.update(delta)
 
     // 物理空間上のオブジェクトの当たり判定
@@ -206,6 +224,7 @@ export default class Game {
 
     for (let i = 0; i < this.dynamicObjects.length; i++) {
       const objThree = this.dynamicObjects[ i ]
+      // ドラッグしていないオブジェクト以外反映する
       if (objThree.userData && objThree.userData.ignorePhysics) {
         continue
       }

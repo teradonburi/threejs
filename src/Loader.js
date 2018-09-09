@@ -5,6 +5,7 @@ import 'three/Draco'
 export default class Loader {
   constructor () {
     this.texLoader = new THREE.TextureLoader()
+    this.audioLoader = new THREE.AudioLoader()
     this.jsonLoader = new THREE.JSONLoader()
     this.glTFLoader = new THREE.GLTFLoader()
     this.glTFLoader.setCrossOrigin('anonymous')
@@ -15,6 +16,12 @@ export default class Loader {
   loadTexture = (filename) => {
     return new Promise((resolve) => {
       this.texLoader.load(filename, texture => resolve(texture))
+    })
+  }
+
+  loadAudio = (filename) => {
+    return new Promise((resolve) => {
+      this.audioLoader.load(filename, buffer => resolve(buffer))
     })
   }
 

@@ -17,6 +17,8 @@ export default class PhysicsWorld {
     this.physicsWorld.addConvexBody = this.addConvexBody
     this.physicsWorld.addTriangleBody = this.addTriangleBody
     this.physicsWorld.addHumanBody = this.addHumanBody
+    this.physicsWorld.addImpulse = this.addImpulse
+    this.physicsWorld.addForce = this.addForce
     this.physicsWorld.setPhysicsPose = this.setPhysicsPose
     this.physicsWorld.setModelPose = this.setModelPose
     this.physicsWorld.hitTest = this.hitTest
@@ -170,6 +172,20 @@ export default class PhysicsWorld {
       body.setActivationState(BODYSTATE_DISABLE_DEACTIVATION)
     }
     return body
+  }
+
+  addImpulse = (objThree, impulse = new THREE.Vector3(0, 0, 0)) => {
+    const objPhys = objThree.userData.physicsBody && objThree.userData.physicsBody
+    if (objPhys) {
+      objPhys.applyCentralImpulse(new Ammo.btVector3(impulse.x, impulse.y, impulse.z))
+    }
+  }
+
+  addForce = (objThree, force = new THREE.Vector3(0, 0, 0)) => {
+    const objPhys = objThree.userData.physicsBody && objThree.userData.physicsBody
+    if (objPhys) {
+      objPhys.applyCentralForce(new Ammo.btVector3(force.x, force.y, force.z))
+    }
   }
 
   // モデルの描画姿勢を物理世界の姿勢に反映
