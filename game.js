@@ -24,6 +24,7 @@ import Keyboard from './src/Keyboard'
 import AudioListener from './src/AudioListener'
 import PositionalAudio from './src/PositionalAudio'
 import Audio from './src/Audio'
+import TWEEN from '@tweenjs/tween.js'
 
 export default class Game {
 
@@ -83,14 +84,36 @@ export default class Game {
     // Sprite
     const texture = await this.loader.loadTexture('./textures/book.png')
     this.sprite = new Sprite(texture)
-    this.sprite.setPos(-1, 1, {right: true, bottom: true})
+    this.sprite.setPos(-1, 1)
+    this.sprite.setCenter({right: true, bottom: true})
     this.sprite.setSize(50, 50)
     this.sceneOrtho.add(this.sprite)
+
+    const coords = { x: -1, y: 1 }
+    this.tween = new TWEEN.Tween(coords)
+        .to({ x: -1, y: 0 }, 3000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .onUpdate(() => {
+          this.sprite.setPos(coords.x, coords.y)
+        })
+
+    this.tweenBack = new TWEEN.Tween(coords)
+        .to({ x: -1, y: 1 }, 3000)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .onUpdate(() => {
+          this.sprite.setPos(coords.x, coords.y)
+        })
+
+    this.tween.chain(this.tweenBack)
+    this.tweenBack.chain(this.tween)
+    this.tween
+      .delay(3000)
+      .start()
 
     // GLTF
     const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
     this.model = new GLTFModel(gltf, true)
-    this.model.init(new Vec3(0, 40, 0), -Math.PI/2, 10)
+    this.model.init(new Vec3(0, 10, 0), -Math.PI/2, 10)
     this.model.actions[0].play()
     this.scene.add(this.model)
     this.model.getCenter()
@@ -133,9 +156,9 @@ export default class Game {
     }
   }
 
-  loop = () => {
+  loop = (frame) => {
     requestAnimationFrame(this.loop)
-    this.render()
+    this.render(frame)
   }
 
   onResize = () =>  {
@@ -148,8 +171,9 @@ export default class Game {
     this.sprite.onResizeWindow()
   }
 
-  render = () => {
+  render = (frame) => {
     const {delta, time} = this.clock.update()
+    TWEEN.update(frame)
     this.model.mixer && this.model.mixer.update(delta)
 
     if (this.dynamicObjects.length < 5 && time > this.timeNextSpawn) {
