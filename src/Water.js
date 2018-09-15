@@ -2,7 +2,7 @@
 import 'three/Water'
 
 export default class Water {
-  constructor (directinalLight, fog = false, size = 10000, textureSize = 512) {
+  constructor (directinalLight, waterColor = 0x001e0f, sunColor = 0xffffff, fog = false, size = 10000, textureSize = 512) {
     const waterGeometry = new THREE.PlaneBufferGeometry(size, size)
     this.water = new THREE.Water(
       waterGeometry,
@@ -12,16 +12,24 @@ export default class Water {
         waterNormals: new THREE.TextureLoader().load('./textures/waternormals.jpg', function (texture) {
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping
         }),
-        alpha: 1.0,
         sunDirection: directinalLight ? directinalLight.position.clone().normalize() : undefined,
-        sunColor: 0xffffff,
-        waterColor: 0x001e0f,
+        sunColor,
+        waterColor,
         distortionScale: 3.7,
         size: 0.1,
+        alpha: 1.0,
         fog,
       })
     this.water.rotation.x = -Math.PI / 2
+    this.water.setEnv = this.setEnv.bind(this)
     return this.water
+  }
+
+  setEnv = ({distortionScale, size, alpha}) => {
+    const uniforms = this.water.material.uniforms
+    if (distortionScale) uniforms.distortionScale.value = distortionScale
+    if (size) uniforms.size.value = size
+    if (alpha) uniforms.alpha.value = alpha
   }
 
 }

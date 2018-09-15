@@ -46,26 +46,6 @@ export default class Game {
     // 物理世界作成
     this.physicsWorld = new PhysicsWorld()
 
-    // 3Dカメラ
-    const eye = new Vec3(50, 50, 150)
-    const lookAt = new Vec3(0, 0, 0)
-    this.camera = new Camera3D(eye, lookAt)
-    this.scene.add(this.camera)
-
-    // 2Dカメラ
-    this.cameraOrtho = new Camera2D()
-
-    // コントロールカメラ
-    const debugEye = new Vec3(100, 200, 200)
-    const debugLookAt = new Vec3(0, 0, 0)
-    this.controlCamera = new Camera3D(debugEye, debugLookAt, 1, 4000)
-    this.controlCamera.controls = this.controlCamera.getControls()
-
-    this.light = new DirectionalLight()
-    this.ambient = new AmbientLight()
-    this.scene.add(this.light)
-    // this.scene.add(this.ambient)
-
     // Audio
     this.audioListener = new AudioListener()
     this.buffer = await this.loader.loadAudio('./sounds/bgm_maoudamashii_cyber39.mp3')
@@ -76,6 +56,53 @@ export default class Game {
     this.soundBuffer = await this.loader.loadAudio('./sounds/ping_pong.mp3')
     this.sound = new PositionalAudio(this.soundBuffer, this.audioListener)
     this.sound.setVolume(10)
+
+    // 3Dカメラ
+    const eye = new Vec3(50, 50, 150)
+    const lookAt = new Vec3(0, 0, 0)
+    this.camera = new Camera3D(eye, lookAt)
+    this.scene.add(this.camera)
+    this.scene.add(this.camera.getHelper()) // helper
+
+    // 2Dカメラ
+    this.cameraOrtho = new Camera2D()
+
+    // コントロールカメラ
+    const debugEye = new Vec3(100, 200, 200)
+    const debugLookAt = new Vec3(0, 0, 0)
+    this.controlCamera = new Camera3D(debugEye, debugLookAt, 1, 4000)
+    this.controlCamera.controls = this.controlCamera.getControls()
+
+    // lighting
+    this.light = new DirectionalLight()
+    this.scene.add(this.light)
+    this.ambient = new AmbientLight()
+    // this.scene.add(this.ambient)
+
+    // Sky
+    this.sky = new Sky()
+    this.sky.setEnv({turbidity: 10, rayleigh: 2, luminance: 1, mieCoefficient: 0.005, mieDirectionalG: 0.8})
+    this.scene.add(this.sky)
+
+    // Water
+    this.water = new Water(this.light)
+    this.water.setEnv({distortionScale: 3.7, alpha: 0.95})
+    this.scene.add(this.water)
+
+    const parameters = {
+      distance: 400,
+      inclination: 0.3,
+      azimuth: 0.205,
+    }
+
+    const theta = Math.PI * (parameters.inclination - 0.5)
+    const phi = 2 * Math.PI * (parameters.azimuth - 0.5)
+    this.light.position.x = parameters.distance * Math.cos(phi)
+    this.light.position.y = parameters.distance * Math.sin(phi) * Math.sin(theta)
+    this.light.position.z = parameters.distance * Math.sin(phi) * Math.cos(theta)
+    this.sky.material.uniforms.sunPosition.value = this.light.position.copy(this.light.position)
+    this.water.material.uniforms.sunDirection.value.copy(this.light.position).normalize()
+
 
     // HeightMap
     this.heightMap = new HeightMap()
@@ -93,37 +120,16 @@ export default class Game {
     // this.scene.add(this.model.boxHelper)
     this.isGround = false
 
-    // Sky
-    this.sky = new Sky()
-    this.scene.add(this.sky)
-
-    // Water
-    this.water = new Water(this.light)
-    this.scene.add(this.water)
-
-    const parameters = {
-      distance: 400,
-      inclination: 0.3,
-      azimuth: 0.205,
-    }
-
-    var theta = Math.PI * (parameters.inclination - 0.5)
-    var phi = 2 * Math.PI * (parameters.azimuth - 0.5)
-    this.light.position.x = parameters.distance * Math.cos(phi)
-    this.light.position.y = parameters.distance * Math.sin(phi) * Math.sin(theta)
-    this.light.position.z = parameters.distance * Math.sin(phi) * Math.cos(theta)
-    this.sky.material.uniforms.sunPosition.value = this.light.position.copy(this.light.position)
-    this.water.material.uniforms.sunDirection.value.copy(this.light.position).normalize()
-
     // Particle
     this.particle = new Particle()
     this.scene.add(this.particle)
 
+    // Grid
     this.grid = new Grid()
-    this.axis = new Axis()
     this.scene.add(this.grid)
+    // Axis
+    this.axis = new Axis()
     this.scene.add(this.axis)
-    this.scene.add(this.camera.getHelper())
 
     // Sprite
     const texture = await this.loader.loadTexture('./textures/sprite1.png')
