@@ -6,7 +6,6 @@ export default class Particle {
     this.maxParticles = maxParticles
     this.particleSystem = new THREE.GPUParticleSystem({
       maxParticles, // 最大パーティクル数
-      containerCount: 1,
     })
     this.tick = 0
     this.options = {

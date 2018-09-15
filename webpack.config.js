@@ -25,6 +25,10 @@ module.exports = {
       'three/Draco': path.join(__dirname, 'node_modules/three/examples/js/loaders/DRACOLoader.js'),
       // Particle
       'three/Particle': path.join(__dirname, 'node_modules/three/examples/js/GPUParticleSystem.js'),
+      // Water
+      'three/Water': path.join(__dirname, 'node_modules/three/examples/js/objects/Water.js'),
+      // Sky
+      'three/Sky': path.join(__dirname, 'node_modules/three/examples/js/objects/Sky.js'),
     },
     extensions: [
       '.js',

@@ -7,7 +7,7 @@ import Axis from './src/Axis'
 import Grid from './src/Grid'
 import Camera2D from './src/Camera2D'
 import Camera3D from './src/Camera3D'
-import CubeMap from './src/CubeMap'
+// import CubeMap from './src/CubeMap'
 import DirectionalLight from './src/DirectionalLight'
 import AmbientLight from './src/AmbientLight'
 import Loader from './src/Loader'
@@ -26,17 +26,20 @@ import AudioListener from './src/AudioListener'
 import PositionalAudio from './src/PositionalAudio'
 import Audio from './src/Audio'
 import Particle from './src/Particle'
+import Water from './src/Water'
+import Sky from './src/Sky'
 
 export default class Game {
 
   init = async () => {
     // アニメーションとかで使う時間用
     this.clock = new Clock()
+    this.loader = new Loader()
     // シーン作成
     this.scene = new Scene()
     this.sceneOrtho = new Scene()
-    this.cubeMap = new CubeMap('textures/')
-    this.scene.background = this.cubeMap
+    // this.cubeMap = new CubeMap('textures/')
+    // this.scene.background = this.cubeMap
     this.scene.fog = new Fog()
     // レンダラー作成
     this.renderer = new Render(this.onResize)
@@ -48,7 +51,6 @@ export default class Game {
     const lookAt = new Vec3(0, 0, 0)
     this.camera = new Camera3D(eye, lookAt)
     this.scene.add(this.camera)
-    this.scene.add(this.camera.getHelper())
 
     // 2Dカメラ
     this.cameraOrtho = new Camera2D()
@@ -64,13 +66,6 @@ export default class Game {
     this.scene.add(this.light)
     // this.scene.add(this.ambient)
 
-    this.grid = new Grid()
-    this.axis = new Axis()
-    this.scene.add(this.grid)
-    this.scene.add(this.axis)
-
-    this.loader = new Loader()
-
     // Audio
     this.audioListener = new AudioListener()
     this.buffer = await this.loader.loadAudio('./sounds/bgm_maoudamashii_cyber39.mp3')
@@ -82,12 +77,60 @@ export default class Game {
     this.sound = new PositionalAudio(this.soundBuffer, this.audioListener)
     this.sound.setVolume(10)
 
+    // HeightMap
+    this.heightMap = new HeightMap()
+    this.scene.add(this.heightMap)
+
+    // GLTF
+    const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
+    this.model = new GLTFModel(gltf, true)
+    this.model.init(new Vec3(0, 10, 0), -Math.PI/2, 10)
+    this.model.actions[0].play()
+    this.model.getCenter()
+    this.physicsWorld.addHumanBody(this.model, 0.8)
+    this.scene.add(this.model)
+    this.model.add(this.sound)
+    // this.scene.add(this.model.boxHelper)
+    this.isGround = false
+
+    // Sky
+    this.sky = new Sky()
+    this.scene.add(this.sky)
+
+    // Water
+    this.water = new Water(this.light)
+    this.scene.add(this.water)
+
+    const parameters = {
+      distance: 400,
+      inclination: 0.3,
+      azimuth: 0.205,
+    }
+
+    var theta = Math.PI * (parameters.inclination - 0.5)
+    var phi = 2 * Math.PI * (parameters.azimuth - 0.5)
+    this.light.position.x = parameters.distance * Math.cos(phi)
+    this.light.position.y = parameters.distance * Math.sin(phi) * Math.sin(theta)
+    this.light.position.z = parameters.distance * Math.sin(phi) * Math.cos(theta)
+    this.sky.material.uniforms.sunPosition.value = this.light.position.copy(this.light.position)
+    this.water.material.uniforms.sunDirection.value.copy(this.light.position).normalize()
+
+    // Particle
+    this.particle = new Particle()
+    this.scene.add(this.particle)
+
+    this.grid = new Grid()
+    this.axis = new Axis()
+    this.scene.add(this.grid)
+    this.scene.add(this.axis)
+    this.scene.add(this.camera.getHelper())
+
     // Sprite
-    const texture = await this.loader.loadTexture('./textures/book.png')
+    const texture = await this.loader.loadTexture('./textures/sprite1.png')
     this.sprite = new Sprite(texture)
     this.sprite.setPos(-1, 1)
     this.sprite.setCenter({right: true, bottom: true})
-    this.sprite.setSize(50, 50)
+    this.sprite.setSize(128, 128)
     this.sceneOrtho.add(this.sprite)
 
     const coords = { x: -1, y: 1 }
@@ -111,26 +154,8 @@ export default class Game {
       .delay(3000)
       .start()
 
-    // GLTF
-    const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
-    this.model = new GLTFModel(gltf, true)
-    this.model.init(new Vec3(0, 10, 0), -Math.PI/2, 10)
-    this.model.actions[0].play()
-    this.scene.add(this.model)
-    this.model.getCenter()
-    this.model.add(this.sound)
-    this.physicsWorld.addHumanBody(this.model, 0.8)
-    // this.scene.add(this.model.boxHelper)
-    this.isGround = false
-
-    // Particle
-    this.particle = new Particle()
-    this.scene.add(this.particle)
-
     // util
     this.keyboard = new Keyboard()
-    this.heightMap = new HeightMap()
-    this.scene.add(this.heightMap)
     this.physicsWorld.addRigidBody(this.heightMap.userData.physicsBody)
 
     this.objectTimePeriod = 3
@@ -262,10 +287,12 @@ export default class Game {
     }
 
     this.particle.simulate(delta)
+    this.water.material.uniforms.time.value += 1.0 / 60.0
 
     this.physicsWorld.setModelPose(this.model)
     this.controlCamera.controls.update()
-    this.renderer.clear()
+    this.renderer.setClearColor(0x000000, 0)
+    this.renderer.clear(true, true, true)
     this.renderer.render(this.scene, this.controlCamera)
     this.renderer.clearDepth()
     this.renderer.render(this.sceneOrtho, this.cameraOrtho)

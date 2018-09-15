@@ -2,7 +2,7 @@
 import 'three/OrbitControls'
 
 export default class Camera {
-  constructor (eye, lookAt, near = 1, far = 200, fov = 45, aspect = window.innerWidth / window.innerHeight) {
+  constructor (eye, lookAt, near = 1, far = 20000, fov = 45, aspect = window.innerWidth / window.innerHeight) {
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
     this.camera.position.set(eye.x, eye.y, eye.z)
     this.camera.lookAt(lookAt)

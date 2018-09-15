@@ -7,7 +7,7 @@ export default class HeightMap {
     this.terrainWidth = 512
     this.terrainDepth = 512
     this.terrainMaxHeight = 10
-    this.terrainMinHeight = 0
+    this.terrainMinHeight = 1
     this.terrainWidthExtents = 200
     this.terrainDepthExtents = 200
     this.heightData = this.generateHeight(this.terrainWidth, this.terrainDepth, this.terrainMinHeight, this.terrainMaxHeight)
