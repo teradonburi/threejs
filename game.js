@@ -1,3 +1,4 @@
+import TWEEN from '@tweenjs/tween.js'
 import Render from './src/Render'
 import Scene from './src/Scene'
 import Clock from './src/Clock'
@@ -24,7 +25,7 @@ import Keyboard from './src/Keyboard'
 import AudioListener from './src/AudioListener'
 import PositionalAudio from './src/PositionalAudio'
 import Audio from './src/Audio'
-import TWEEN from '@tweenjs/tween.js'
+import Particle from './src/Particle'
 
 export default class Game {
 
@@ -122,6 +123,11 @@ export default class Game {
     // this.scene.add(this.model.boxHelper)
     this.isGround = false
 
+    // Particle
+    this.particle = new Particle()
+    this.scene.add(this.particle)
+
+    // util
     this.keyboard = new Keyboard()
     this.heightMap = new HeightMap()
     this.scene.add(this.heightMap)
@@ -254,6 +260,8 @@ export default class Game {
       }
       this.physicsWorld.setModelPose(objThree)
     }
+
+    this.particle.simulate(delta)
 
     this.physicsWorld.setModelPose(this.model)
     this.controlCamera.controls.update()

@@ -23,6 +23,8 @@ module.exports = {
       'three/Convex': path.join(__dirname, 'node_modules/three/examples/js/geometries/ConvexGeometry.js'),
       // DracoLoader
       'three/Draco': path.join(__dirname, 'node_modules/three/examples/js/loaders/DRACOLoader.js'),
+      // Particle
+      'three/Particle': path.join(__dirname, 'node_modules/three/examples/js/GPUParticleSystem.js'),
     },
     extensions: [
       '.js',
