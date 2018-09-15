@@ -75,6 +75,17 @@ export default class Game {
 
     // lighting
     this.light = new DirectionalLight()
+
+    const parameters = {
+      distance: 400,
+      inclination: 0.3,
+      azimuth: 0.205,
+    }
+    const theta = Math.PI * (parameters.inclination - 0.5)
+    const phi = 2 * Math.PI * (parameters.azimuth - 0.5)
+    this.light.position.x = parameters.distance * Math.cos(phi)
+    this.light.position.y = parameters.distance * Math.sin(phi) * Math.sin(theta)
+    this.light.position.z = parameters.distance * Math.sin(phi) * Math.cos(theta)
     this.scene.add(this.light)
     this.ambient = new AmbientLight()
     // this.scene.add(this.ambient)
@@ -82,27 +93,14 @@ export default class Game {
     // Sky
     this.sky = new Sky()
     this.sky.setEnv({turbidity: 10, rayleigh: 2, luminance: 1, mieCoefficient: 0.005, mieDirectionalG: 0.8})
+    this.sky.setLight(this.light)
     this.scene.add(this.sky)
 
     // Water
     this.water = new Water(this.light)
     this.water.setEnv({distortionScale: 3.7, alpha: 0.95})
+    this.water.setLight(this.light)
     this.scene.add(this.water)
-
-    const parameters = {
-      distance: 400,
-      inclination: 0.3,
-      azimuth: 0.205,
-    }
-
-    const theta = Math.PI * (parameters.inclination - 0.5)
-    const phi = 2 * Math.PI * (parameters.azimuth - 0.5)
-    this.light.position.x = parameters.distance * Math.cos(phi)
-    this.light.position.y = parameters.distance * Math.sin(phi) * Math.sin(theta)
-    this.light.position.z = parameters.distance * Math.sin(phi) * Math.cos(theta)
-    this.sky.material.uniforms.sunPosition.value = this.light.position.copy(this.light.position)
-    this.water.material.uniforms.sunDirection.value.copy(this.light.position).normalize()
-
 
     // HeightMap
     this.heightMap = new HeightMap()
@@ -293,7 +291,7 @@ export default class Game {
     }
 
     this.particle.simulate(delta)
-    this.water.material.uniforms.time.value += 1.0 / 60.0
+    this.water.update()
 
     this.physicsWorld.setModelPose(this.model)
     this.controlCamera.controls.update()

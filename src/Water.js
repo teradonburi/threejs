@@ -22,6 +22,8 @@ export default class Water {
       })
     this.water.rotation.x = -Math.PI / 2
     this.water.setEnv = this.setEnv.bind(this)
+    this.water.setLight = this.setLight.bind(this)
+    this.water.update = this.update.bind(this)
     return this.water
   }
 
@@ -30,6 +32,14 @@ export default class Water {
     if (distortionScale) uniforms.distortionScale.value = distortionScale
     if (size) uniforms.size.value = size
     if (alpha) uniforms.alpha.value = alpha
+  }
+
+  setLight = (light) => {
+    this.water.material.uniforms.sunDirection.value.copy(light.position).normalize()
+  }
+
+  update = (delta = 1.0 / 60.0) => {
+    this.water.material.uniforms.time.value += delta
   }
 
 }
