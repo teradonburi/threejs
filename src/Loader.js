@@ -30,6 +30,7 @@ export default class Loader {
       this.jsonLoader.load(filename, geometry => resolve(geometry))
     })
   }
+
   loadGLTFModel = (filename) => {
     return new Promise((resolve) => {
       this.glTFLoader.load(filename, data => resolve(data))

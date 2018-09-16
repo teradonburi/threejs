@@ -53,7 +53,7 @@ export default class Game {
 
     // Audio
     this.audioListener = new AudioListener()
-    this.buffer = await this.loader.loadAudio('./sounds/bgm_maoudamashii_cyber39.mp3')
+    this.buffer = await this.loader.loadAudio('./sounds/bgm_maoudamashii_healing13.mp3')
     this.bgm = new Audio(this.buffer, this.audioListener)
     this.bgm.setLoop(true)
     this.bgm.setVolume(0.1)
@@ -113,6 +113,25 @@ export default class Game {
     this.physicsWorld.addHeightMapBody(this.heightMap)
 
     // GLTF
+    const tree = await this.loader.loadGLTFModel('./model/tree.glb')
+    const treePositions = [
+      new Vec3(132, 20, -190),
+      new Vec3(216, 20, 80),
+      new Vec3(-82, 20, 222),
+      new Vec3(13, 20, -125),
+      new Vec3(-100, 20, 31),
+    ]
+    this.trees = []
+    for (let i = 0; i < 5; i++) {
+      this.trees.push(new GLTFModel(tree, true, true))
+      this.trees[i].init(treePositions[i], 0, 8)
+      this.trees[i].getCenter()
+      this.physicsWorld.addBoxBody(this.trees[i], this.trees[i].boundingBox.size(), 0, true)
+      this.scene.add(this.trees[i])
+      this.scene.add(this.trees[i].boxHelper)
+    }
+
+    // GLTF Skin
     const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
     this.model = new GLTFModel(gltf, true)
     this.model.init(new Vec3(0, 20, 0), -Math.PI/2, 10)
@@ -140,7 +159,7 @@ export default class Game {
     this.sprite = new Sprite(texture)
     this.sprite.setPos(-1, 1)
     this.sprite.setCenter({right: true, bottom: true})
-    this.sprite.setSize(128, 128)
+    this.sprite.setSize(64, 64)
     this.sceneOrtho.add(this.sprite)
 
     const coords = { x: -1, y: 1 }

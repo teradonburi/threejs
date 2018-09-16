@@ -40,13 +40,13 @@ export default class PhysicsWorld {
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
-  addBoxBody = (objThree, size, mass) => {
+  addBoxBody = (objThree, size, mass, isKinematic = false, isStatic = false) => {
     const shape = new Ammo.btBoxShape(new Ammo.btVector3(size.x * 0.5, size.y * 0.5, size.z * 0.5))
     shape.setMargin(0.05)
 
     const pos = new THREE.Vector3(objThree.position.x, objThree.position.y, objThree.position.z)
     const transform = this.createTransform(pos, objThree.quaternion)
-    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape, isKinematic, isStatic)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
