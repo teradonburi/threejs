@@ -48,6 +48,7 @@ export default class HeightMap {
       vertices[ j + 1 ] = this.heightData[ i ]
     }
     geometry.computeVertexNormals()
+    geometry.computeFaceNormals()
     const groundMaterial = new THREE.MeshPhongMaterial({ color })
     const terrainMesh = new THREE.Mesh(geometry, groundMaterial)
     return terrainMesh
