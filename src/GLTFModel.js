@@ -33,10 +33,11 @@ export default class GLTFModel {
     this.object.init = this.init.bind(this)
     this.object.getCenter = this.getCenter.bind(this)
     this.maxSpeed = 0.2
-    this.speed = 0.05
+    this.speed = 0.5
     this.velocity = new THREE.Vector3(0, 0, 0)
     this.object.setSpeed = this.setSpeed.bind(this)
     this.object.move = this.move.bind(this)
+    this.object.moveTo = this.moveTo.bind(this)
     this.object.stop = this.stop.bind(this)
     return this.object
   }
@@ -69,10 +70,29 @@ export default class GLTFModel {
     let dir = new THREE.Vector3()
     camera.getWorldDirection(dir)
     dir.y = 0
-    const yAxis = new THREE.Vector3(0, 1, 0)
     dir.normalize()
+    const yAxis = new THREE.Vector3(0, 1, 0)
 
     dir.applyAxisAngle(yAxis, radian)
+    const rotate = new THREE.Vector3()
+    rotate.copy(dir)
+    rotate.applyAxisAngle(yAxis, this.initRotate)
+    this.object.lookAt(new THREE.Vector3(this.object.position.x + rotate.x, this.object.position.y + rotate.y, this.object.position.z + rotate.z))
+    dir.multiplyScalar(this.speed)
+    if (this.velocity.length() < this.maxSpeed) {
+      this.velocity.x += dir.x
+      this.velocity.z += dir.z
+    }
+    this.object.position.x += this.velocity.x
+    this.object.position.z += this.velocity.z
+  }
+
+  moveTo = (pos) => {
+    let dir = new THREE.Vector3(pos.x - this.object.position.x, pos.y - this.object.position.y, pos.z - this.object.position.z)
+    dir.y = 0
+    dir.normalize()
+    const yAxis = new THREE.Vector3(0, 1, 0)
+
     const rotate = new THREE.Vector3()
     rotate.copy(dir)
     rotate.applyAxisAngle(yAxis, this.initRotate)

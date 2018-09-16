@@ -112,13 +112,6 @@ export default class Game {
     this.scene.add(this.heightMap)
     this.physicsWorld.addHeightMapBody(this.heightMap)
 
-    this.helper = new ConeMarker(20, 100)
-    this.helper.geometry.translate(0, 50, 0)
-    this.helper.geometry.rotateX(Math.PI / 2)
-    this.helper.geometry.scale(0.1, 0.1, 0.1)
-    this.scene.add(this.helper)
-    document.addEventListener('mousemove', this.onMouseMove, false)
-
     // GLTF
     const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
     this.model = new GLTFModel(gltf, true)
@@ -171,12 +164,23 @@ export default class Game {
       .delay(3000)
       .start()
 
-    // util
+    // キーボード
     this.keyboard = new Keyboard()
 
     // ドラッグ処理
     this.dynamicObjects = []
     this.dragControls = new DragControls(this.dynamicObjects, this.controlCamera, this.renderer, this.onDragStart, this.onDragEnd)
+
+    // マウス/タッチ
+    this.helper = new ConeMarker(20, 100)
+    this.helper.geometry.translate(0, 50, 0)
+    this.helper.geometry.rotateX(Math.PI / 2)
+    this.helper.geometry.scale(0.1, 0.1, 0.1)
+    this.scene.add(this.helper)
+    document.addEventListener('mousemove', this.onMouseMove, false)
+    document.addEventListener('mousedown', this.onMouseClick, false)
+    this.clicked = false
+    this.clickPos = new Vec3()
 
     this.objectTimePeriod = 3
     this.timeNextSpawn = this.objectTimePeriod
@@ -233,6 +237,20 @@ export default class Game {
     }
   }
 
+  onMouseClick = (event) => {
+    const mouse = {
+      x: (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1,
+      y: -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1,
+    }
+
+    const intersects = this.rayCaster.getIntersect(mouse, this.controlCamera, this.heightMap)
+
+    if (intersects.length > 0) {
+      this.clicked = true
+      this.clickPos = intersects[0].point
+    }
+  }
+
   render = (frame) => {
     const {delta, time} = this.clock.update()
     TWEEN.update(frame)
@@ -285,6 +303,13 @@ export default class Game {
     // S
     } else if (this.keyboard.isPressS()) {
       this.model.move(this.controlCamera, Math.PI)
+    }
+    if (this.clicked) {
+      const dir = new Vec3(this.clickPos.x - this.model.position.x, this.clickPos.y - this.model.position.y, this.clickPos.z - this.model.position.z)
+      if (dir.length() < 3) {
+        this.clicked = false
+      }
+      this.model.moveTo(this.clickPos)
     }
     this.physicsWorld.setPhysicsPose(this.model)
 
