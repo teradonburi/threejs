@@ -109,7 +109,7 @@ export default class Game {
     // HeightMap
     this.heightMap = new HeightMap()
     this.scene.add(this.heightMap)
-    this.physicsWorld.addRigidBody(this.heightMap.userData.physicsBody)
+    this.physicsWorld.addHeightMapBody(this.heightMap)
 
     const geometry = new THREE.ConeBufferGeometry(20, 100, 3)
     geometry.translate(0, 50, 0)
@@ -122,7 +122,7 @@ export default class Game {
     // GLTF
     const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
     this.model = new GLTFModel(gltf, true)
-    this.model.init(new Vec3(0, 10, 0), -Math.PI/2, 10)
+    this.model.init(new Vec3(0, 20, 0), -Math.PI/2, 10)
     this.model.actions[0].play()
     this.model.getCenter()
     this.physicsWorld.addHumanBody(this.model, 0.8)

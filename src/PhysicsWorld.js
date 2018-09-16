@@ -16,6 +16,7 @@ export default class PhysicsWorld {
     this.physicsWorld.addCapsuleBody = this.addCapsuleBody.bind(this)
     this.physicsWorld.addConvexBody = this.addConvexBody.bind(this)
     this.physicsWorld.addTriangleBody = this.addTriangleBody.bind(this)
+    this.physicsWorld.addHeightMapBody = this.addHeightMapBody.bind(this)
     this.physicsWorld.addHumanBody = this.addHumanBody.bind(this)
     this.physicsWorld.addImpulse = this.addImpulse.bind(this)
     this.physicsWorld.addForce = this.addForce.bind(this)
@@ -135,6 +136,48 @@ export default class PhysicsWorld {
 
     const transform = this.createTransform(objThree.position, objThree.quaternion)
     objThree.userData.physicsBody = this.createBody(mass, transform, shape)
+    this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
+  }
+
+  addHeightMapBody = (objThree) => {
+		// Creates height data buffer in Ammo heap
+    const ammoHeightData = Ammo._malloc(4 * objThree.terrainWidth * objThree.terrainDepth)
+		// Copy the javascript height data array to the Ammo one.
+    let p = 0
+    let p2 = 0
+    for (let j = 0; j < objThree.terrainDepth; j++) {
+      for (let i = 0; i < objThree.terrainWidth; i++) {
+				// write 32-bit float data to memory
+        Ammo.HEAPF32[ammoHeightData + p2 >> 2] = objThree.heightData[p]
+        p++
+				// 4 bytes/float
+        p2 += 4
+      }
+    }
+		// Creates the heightfield physics shape
+    const heightFieldShape = new Ammo.btHeightfieldTerrainShape(
+      objThree.terrainWidth,
+      objThree.terrainDepth,
+      ammoHeightData,
+      1,
+      objThree.terrainMinHeight,
+      objThree.terrainMaxHeight,
+      1,
+      'PHY_FLOAT',
+      false
+    )
+		// Set horizontal scale
+    const scaleX = objThree.terrainGeometoryWidth / (objThree.terrainWidth - 1)
+    const scaleZ = objThree.terrainGeometoryDepth / (objThree.terrainDepth - 1)
+    heightFieldShape.setLocalScaling(new Ammo.btVector3(scaleX, 1, scaleZ))
+    heightFieldShape.setMargin(0.05)
+
+		// Create the terrain body
+    const groundTransform = new Ammo.btTransform()
+    groundTransform.setIdentity()
+		// Shifts the terrain, since bullet re-centers it on its bounding box.
+    groundTransform.setOrigin(new Ammo.btVector3(0, (objThree.terrainMaxHeight + objThree.terrainMinHeight) / 2, 0))
+    objThree.userData.physicsBody = this.createBody(0, groundTransform, heightFieldShape, false, true)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
