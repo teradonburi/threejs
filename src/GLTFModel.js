@@ -30,14 +30,14 @@ export default class GLTFModel {
     }
     this.object.receiveShadow = true
     this.object.castShadow = true
-    this.object.init = this.init
-    this.object.getCenter = this.getCenter
+    this.object.init = this.init.bind(this)
+    this.object.getCenter = this.getCenter.bind(this)
     this.maxSpeed = 0.2
     this.speed = 0.05
     this.velocity = new THREE.Vector3(0, 0, 0)
-    this.object.setSpeed = this.setSpeed
-    this.object.move = this.move
-    this.object.stop = this.stop
+    this.object.setSpeed = this.setSpeed.bind(this)
+    this.object.move = this.move.bind(this)
+    this.object.stop = this.stop.bind(this)
     return this.object
   }
 

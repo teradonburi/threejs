@@ -6,9 +6,9 @@ export default class Camera {
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
     this.camera.position.set(eye.x, eye.y, eye.z)
     this.camera.lookAt(lookAt)
-    this.camera.getHelper = this.getHelper
-    this.camera.getControls = this.getControls
-    this.camera.resize = this.resize
+    this.camera.getHelper = this.getHelper.bind(this)
+    this.camera.getControls = this.getControls.bind(this)
+    this.camera.resize = this.resize.bind(this)
     return this.camera
   }
 

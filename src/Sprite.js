@@ -11,11 +11,11 @@ export default class Sprite {
     this.sprite.initScreenAspect = screenAspect
     this.sprite.scale.set(texture.image.width, texture.image.height * screenAspect, depth)
     this.sprite.depth = depth
-    this.sprite.setPos = this.setPos
-    this.sprite.setCenter = this.setCenter
-    this.sprite.setSize = this.setSize
-    this.sprite.setDepth = this.setDepth
-    this.sprite.onResizeWindow = this.onResizeWindow
+    this.sprite.setPos = this.setPos.bind(this)
+    this.sprite.setCenter = this.setCenter.bind(this)
+    this.sprite.setSize = this.setSize.bind(this)
+    this.sprite.setDepth = this.setDepth.bind(this)
+    this.sprite.onResizeWindow = this.onResizeWindow.bind(this)
     return this.sprite
   }
 

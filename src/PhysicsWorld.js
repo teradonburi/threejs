@@ -8,20 +8,20 @@ export default class PhysicsWorld {
     const solver = new Ammo.btSequentialImpulseConstraintSolver()
     this.physicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
     this.physicsWorld.setGravity(gravity)
-    this.physicsWorld.update = this.update
-    this.physicsWorld.addSphereBody = this.addSphereBody
-    this.physicsWorld.addBoxBody = this.addBoxBody
-    this.physicsWorld.addCylinderBody = this.addCylinderBody
-    this.physicsWorld.addConeBody = this.addConeBody
-    this.physicsWorld.addCapsuleBody = this.addCapsuleBody
-    this.physicsWorld.addConvexBody = this.addConvexBody
-    this.physicsWorld.addTriangleBody = this.addTriangleBody
-    this.physicsWorld.addHumanBody = this.addHumanBody
-    this.physicsWorld.addImpulse = this.addImpulse
-    this.physicsWorld.addForce = this.addForce
-    this.physicsWorld.setPhysicsPose = this.setPhysicsPose
-    this.physicsWorld.setModelPose = this.setModelPose
-    this.physicsWorld.hitTest = this.hitTest
+    this.physicsWorld.update = this.update.bind(this)
+    this.physicsWorld.addSphereBody = this.addSphereBody.bind(this)
+    this.physicsWorld.addBoxBody = this.addBoxBody.bind(this)
+    this.physicsWorld.addCylinderBody = this.addCylinderBody.bind(this)
+    this.physicsWorld.addConeBody = this.addConeBody.bind(this)
+    this.physicsWorld.addCapsuleBody = this.addCapsuleBody.bind(this)
+    this.physicsWorld.addConvexBody = this.addConvexBody.bind(this)
+    this.physicsWorld.addTriangleBody = this.addTriangleBody.bind(this)
+    this.physicsWorld.addHumanBody = this.addHumanBody.bind(this)
+    this.physicsWorld.addImpulse = this.addImpulse.bind(this)
+    this.physicsWorld.addForce = this.addForce.bind(this)
+    this.physicsWorld.setPhysicsPose = this.setPhysicsPose.bind(this)
+    this.physicsWorld.setModelPose = this.setModelPose.bind(this)
+    this.physicsWorld.hitTest = this.hitTest.bind(this)
     return this.physicsWorld
   }
 

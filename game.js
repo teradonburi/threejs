@@ -290,7 +290,9 @@ export default class Game {
       this.physicsWorld.setModelPose(objThree)
     }
 
-    this.particle.simulate(delta)
+    const horizontalSpeed = 1.5
+    const verticalSpeed = 1.33
+    this.particle.simulate(delta, new Vec3(Math.sin(this.particle.tick * horizontalSpeed) * 20, Math.sin(this.particle.tick * verticalSpeed) * 10 + 30, Math.sin(this.particle.tick * horizontalSpeed + verticalSpeed) * 5))
     this.water.update()
 
     this.physicsWorld.setModelPose(this.model)

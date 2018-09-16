@@ -17,7 +17,7 @@ export default class Render {
     window.addEventListener('resize', onResize)
 
     this.renderer.autoClear = false
-    this.renderer.resize = this.resize
+    this.renderer.resize = this.resize.bind(this)
     this.renderer.shadowMap.enabled = true
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
     return this.renderer
