@@ -105,6 +105,7 @@ export default class Game {
     // HeightMap
     this.heightMap = new HeightMap()
     this.scene.add(this.heightMap)
+    this.physicsWorld.addRigidBody(this.heightMap.userData.physicsBody)
 
     // GLTF
     const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
@@ -160,14 +161,13 @@ export default class Game {
 
     // util
     this.keyboard = new Keyboard()
-    this.physicsWorld.addRigidBody(this.heightMap.userData.physicsBody)
-
-    this.objectTimePeriod = 3
-    this.timeNextSpawn = this.objectTimePeriod
 
     // ドラッグ処理
     this.dynamicObjects = []
     this.dragControls = new DragControls(this.dynamicObjects, this.controlCamera, this.renderer, this.onDragStart, this.onDragEnd)
+
+    this.objectTimePeriod = 3
+    this.timeNextSpawn = this.objectTimePeriod
 
     this.loop()
   }
