@@ -18,6 +18,7 @@ import Sphere from './src/Sphere'
 import Box from './src/Box'
 import Cylinder from './src/Cylinder'
 import Cone from './src/Cone'
+import ConeMarker from './src/ConeMarker'
 import GLTFModel from './src/GLTFModel'
 import PhysicsWorld from './src/PhysicsWorld'
 import DragControls from './src/DragControls'
@@ -111,13 +112,12 @@ export default class Game {
     this.scene.add(this.heightMap)
     this.physicsWorld.addHeightMapBody(this.heightMap)
 
-    const geometry = new THREE.ConeBufferGeometry(20, 100, 3)
-    geometry.translate(0, 50, 0)
-    geometry.rotateX(Math.PI / 2)
-    geometry.scale(0.1, 0.1, 0.1)
-    this.helper = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial())
+    this.helper = new ConeMarker(20, 100)
+    this.helper.geometry.translate(0, 50, 0)
+    this.helper.geometry.rotateX(Math.PI / 2)
+    this.helper.geometry.scale(0.1, 0.1, 0.1)
     this.scene.add(this.helper)
-    this.renderer.domElement.addEventListener('mousemove', this.onMouseMove, false)
+    document.addEventListener('mousemove', this.onMouseMove, false)
 
     // GLTF
     const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
