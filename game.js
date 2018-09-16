@@ -28,6 +28,7 @@ import Audio from './src/Audio'
 import Particle from './src/Particle'
 import Water from './src/Water'
 import Sky from './src/Sky'
+import RayCaster from './src/RayCaster'
 
 export default class Game {
 
@@ -45,6 +46,9 @@ export default class Game {
     this.renderer = new Render(this.onResize)
     // 物理世界作成
     this.physicsWorld = new PhysicsWorld()
+
+    // RayCaster
+    this.rayCaster = new RayCaster()
 
     // Audio
     this.audioListener = new AudioListener()
@@ -106,6 +110,14 @@ export default class Game {
     this.heightMap = new HeightMap()
     this.scene.add(this.heightMap)
     this.physicsWorld.addRigidBody(this.heightMap.userData.physicsBody)
+
+    const geometry = new THREE.ConeBufferGeometry(20, 100, 3)
+    geometry.translate(0, 50, 0)
+    geometry.rotateX(Math.PI / 2)
+    geometry.scale(0.1, 0.1, 0.1)
+    this.helper = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial())
+    this.scene.add(this.helper)
+    this.renderer.domElement.addEventListener('mousemove', this.onMouseMove, false)
 
     // GLTF
     const gltf = await this.loader.loadGLTFModel('./model/CesiumMan.gltf')
@@ -204,6 +216,21 @@ export default class Game {
       camera.resize()
     }
     this.sprite.onResizeWindow()
+  }
+
+  onMouseMove = (event) => {
+    const mouse = {
+      x: (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1,
+      y: -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1,
+    }
+
+    const intersects = this.rayCaster.getIntersect(mouse, this.controlCamera, this.heightMap)
+
+    if (intersects.length > 0) {
+      this.helper.position.set(0, 0, 0)
+      this.helper.lookAt(intersects[0].face.normal)
+      this.helper.position.copy(intersects[0].point)
+    }
   }
 
   render = (frame) => {
