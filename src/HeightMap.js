@@ -1,4 +1,4 @@
-/* global THREE: false, Ammo: false */
+/* global THREE: false, ImprovedNoise: false, Ammo: false */
 
 export default class HeightMap {
 
@@ -6,12 +6,12 @@ export default class HeightMap {
     // Heightfield parameters
     this.terrainWidth = 512
     this.terrainDepth = 512
-    this.terrainMaxHeight = 10
+    this.terrainMaxHeight = 20
     this.terrainMinHeight = 1
     this.terrainWidthExtents = 200
     this.terrainDepthExtents = 200
     this.heightData = this.generateHeight(this.terrainWidth, this.terrainDepth, this.terrainMinHeight, this.terrainMaxHeight)
-    this.terrainMesh = this.createGeometry()
+    this.terrainMesh = this.createGeometry(this.terrainWidth, this.terrainDepth)
     this.terrainMesh.receiveShadow = true
     this.terrainMesh.castShadow = true
     this.terrainMesh.userData.physicsBody = this.createPhysicsBody()
@@ -19,39 +19,83 @@ export default class HeightMap {
   }
 
   generateHeight = (width, depth, minHeight, maxHeight) => {
-		// Generates the height data (a sinus wave)
     const size = width * depth
     const data = new Float32Array(size)
+    const perlin = new ImprovedNoise()
     const hRange = maxHeight - minHeight
-    const w2 = width / 2
-    const d2 = depth / 2
-    const phaseMult = 12
-    let p = 0
-    for (let j = 0; j < depth; j++) {
-      for (let i = 0; i < width; i++) {
-        const radius = Math.sqrt(Math.pow((i - w2) / w2, 2.0) + Math.pow((j - d2) / d2, 2.0))
-        const height = (Math.sin(radius * phaseMult) + 1) * 0.5 * hRange + minHeight
-        data[p] = height
-        p++
+    let quality = 1
+    const z = Math.random() * 100
+    for (let j = 0; j < 4; j ++) {
+      for (let i = 0; i < size; i ++) {
+        const x = i % width
+        const y = ~ ~ (i / width)
+        data[i] += (Math.abs(perlin.noise(x / quality, y / quality, z) * quality * 1.75) / 255.0 * hRange + minHeight)
       }
+      quality *= 5
     }
     return data
   }
 
-  createGeometry = (color = 0xC7C7C7) => {
+
+  createGeometry = (width, depth) => {
     // draw heightmap
     const geometry = new THREE.PlaneBufferGeometry(this.terrainWidthExtents, this.terrainDepthExtents, this.terrainWidth - 1, this.terrainDepth - 1)
     geometry.rotateX(-Math.PI / 2)
     const vertices = geometry.attributes.position.array
     for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
 			// j + 1 because it is the y component that we modify
-      vertices[ j + 1 ] = this.heightData[ i ]
+      vertices[j + 1] = this.heightData[i]
     }
     geometry.computeVertexNormals()
     geometry.computeFaceNormals()
-    const groundMaterial = new THREE.MeshPhongMaterial({ color })
-    const terrainMesh = new THREE.Mesh(geometry, groundMaterial)
+    const texture = new THREE.CanvasTexture(this.generateTexture(this.heightData, width, depth))
+    texture.wrapS = THREE.ClampToEdgeWrapping
+    texture.wrapT = THREE.ClampToEdgeWrapping
+    const terrainMesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ map: texture }))
     return terrainMesh
+  }
+
+  // アンビエントオクルージョンテクスチャ作成
+  generateTexture = (data, width, height) => {
+    const vector3 = new THREE.Vector3(0, 0, 0)
+    const sun = new THREE.Vector3(1, 1, 1)
+    sun.normalize()
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    let context = canvas.getContext('2d')
+    context.fillStyle = '#000'
+    context.fillRect(0, 0, width, height)
+    let image = context.getImageData(0, 0, canvas.width, canvas.height)
+    let imageData = image.data
+    for (let i = 0, j = 0, l = imageData.length; i < l; i += 4, j ++) {
+      vector3.x = data[j - 2] - data[j + 2]
+      vector3.y = 2
+      vector3.z = data[j - width * 2] - data[j + width * 2]
+      vector3.normalize()
+      const shade = vector3.dot(sun)
+      imageData[i] = (96 + shade * 128) * (0.5 + data[j] * 0.007)
+      imageData[i + 1] = (32 + shade * 96) * (0.5 + data[j] * 0.007)
+      imageData[i + 2] = (shade * 96) * (0.5 + data[j] * 0.007)
+    }
+    context.putImageData(image, 0, 0)
+    // Scaled 4x
+    const canvasScaled = document.createElement('canvas')
+    canvasScaled.width = width * 4
+    canvasScaled.height = height * 4
+    context = canvasScaled.getContext('2d')
+    context.scale(4, 4)
+    context.drawImage(canvas, 0, 0)
+    image = context.getImageData(0, 0, canvasScaled.width, canvasScaled.height)
+    imageData = image.data
+    for (let i = 0, l = imageData.length; i < l; i += 4) {
+      const v = ~ ~ (Math.random() * 5)
+      imageData[i] += v
+      imageData[i + 1] += v
+      imageData[i + 2] += v
+    }
+    context.putImageData(image, 0, 0)
+    return canvasScaled
   }
 
   createPhysicsBody() {

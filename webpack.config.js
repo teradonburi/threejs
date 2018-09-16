@@ -10,7 +10,7 @@ module.exports = {
     filename: 'bundle.js',
   },
   resolve: {
-    // 使用したいコントロールやレンダラを定義しておきます。(下記は一例です。使用しないものは除いておいてよいです)
+    // 使用したいコントロールやレンダラを定義しておきます
     alias: {
       // 物体ドラッグ
       'three/DragControls': path.join(__dirname, 'node_modules/three/examples/js/controls/DragControls.js'),
@@ -18,9 +18,6 @@ module.exports = {
       'three/OrbitControls': path.join(__dirname, 'node_modules/three/examples/js/controls/OrbitControls.js'),
       // GLTF
       'three/GLTFLoader': path.join(__dirname, 'node_modules/three/examples/js/loaders/GLTFLoader.js'),
-      // Convex
-      'three/QuickHull': path.join(__dirname, 'node_modules/three/examples/js/QuickHull.js'),
-      'three/Convex': path.join(__dirname, 'node_modules/three/examples/js/geometries/ConvexGeometry.js'),
       // DracoLoader
       'three/Draco': path.join(__dirname, 'node_modules/three/examples/js/loaders/DRACOLoader.js'),
       // Particle
