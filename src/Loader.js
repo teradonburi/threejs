@@ -9,7 +9,7 @@ export default class Loader {
     this.jsonLoader = new THREE.JSONLoader()
     this.glTFLoader = new THREE.GLTFLoader()
     this.glTFLoader.setCrossOrigin('anonymous')
-    THREE.DRACOLoader.setDecoderPath('node_modules/three/examples/js/libs/draco/gltf/')
+    THREE.DRACOLoader.setDecoderPath('demo/gltf/')
     this.glTFLoader.setDRACOLoader(new THREE.DRACOLoader())
   }
 
