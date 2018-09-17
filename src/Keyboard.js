@@ -23,6 +23,7 @@ export default class Keyboard {
   isPressD = () => this.getKey(68)
   isPressW = () => this.getKey(87)
   isPressS = () => this.getKey(83)
+  isPressC = () => this.getKey(67)
   isPressLeft = () => this.getKey(37)
   isPressRight = () => this.getKey(39)
   isPressUp = () => this.getKey(38)

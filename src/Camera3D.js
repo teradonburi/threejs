@@ -6,20 +6,15 @@ export default class Camera {
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
     this.camera.position.set(eye.x, eye.y, eye.z)
     this.camera.lookAt(lookAt)
-    this.camera.getHelper = this.getHelper.bind(this)
-    this.camera.getControls = this.getControls.bind(this)
+    this.camera.helper = new THREE.CameraHelper(this.camera)
+    this.camera.createControls = this.createControls.bind(this)
     this.camera.resize = this.resize.bind(this)
     return this.camera
   }
 
-  getHelper = () => {
-    this.helper = new THREE.CameraHelper(this.camera)
-    return this.helper
-  }
-
-  getControls = () => {
-    this.controls = new THREE.OrbitControls(this.camera)
-    return this.controls
+  createControls = () => {
+    this.camera.controls = new THREE.OrbitControls(this.camera)
+    return this.camera.controls
   }
 
   resize = () => {

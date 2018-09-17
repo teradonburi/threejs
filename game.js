@@ -67,13 +67,16 @@ export default class Game {
     const lookAt = new Vec3(0, 0, 0)
     this.camera = new Camera3D(eye, lookAt)
     this.scene.add(this.camera)
-    this.scene.add(this.camera.getHelper()) // helper
+    this.scene.add(this.camera.helper) // helper
 
     // コントロールカメラ
     const debugEye = new Vec3(100, 200, 200)
     const debugLookAt = new Vec3(0, 0, 0)
     this.controlCamera = new Camera3D(debugEye, debugLookAt, 1, 4000)
-    this.controlCamera.controls = this.controlCamera.getControls()
+    this.controlCamera.controls = this.controlCamera.createControls()
+
+    this.selectCamera = this.controlCamera
+    this.isDebug = true
 
     // 2Dカメラ
     this.cameraOrtho = new Camera2D()
@@ -210,8 +213,8 @@ export default class Game {
   }
 
   onDragStart = (e) => {
-    if (this.controlCamera.controls) {
-      this.controlCamera.controls.enabled = false
+    if (this.selectCamera.controls) {
+      this.selectCamera.controls.enabled = false
     }
     if (e.object.userData) {
       e.object.userData.ignorePhysics = true
@@ -223,8 +226,8 @@ export default class Game {
       this.physicsWorld.setPhysicsPose(e.object)
       e.object.userData.ignorePhysics = false
     }
-    if (this.controlCamera.controls) {
-      this.controlCamera.controls.enabled = true
+    if (this.selectCamera.controls) {
+      this.selectCamera.controls.enabled = true
     }
   }
 
@@ -249,7 +252,7 @@ export default class Game {
       y: -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1,
     }
 
-    const intersects = this.rayCaster.getIntersect(mouse, this.controlCamera, this.heightMap)
+    const intersects = this.rayCaster.getIntersect(mouse, this.selectCamera, this.heightMap)
 
     if (intersects.length > 0) {
       this.helper.position.set(0, 0, 0)
@@ -264,7 +267,7 @@ export default class Game {
       y: -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1,
     }
 
-    const intersects = this.rayCaster.getIntersect(mouse, this.controlCamera, this.heightMap)
+    const intersects = this.rayCaster.getIntersect(mouse, this.selectCamera, this.heightMap)
 
     if (intersects.length > 0) {
       this.clicked = true
@@ -319,20 +322,39 @@ export default class Game {
       this.timeNextSpawn = time + this.objectTimePeriod
     }
 
+    // C
+    if (this.keyboard.isPressC() && !this.prevPressC) {
+      this.isDebug = !this.isDebug
+      this.prevPressC = true
+      if (this.isDebug) {
+        this.selectCamera = this.controlCamera
+        this.camera.helper.visible = true
+        this.grid.visible = true
+        this.axis.visible = true
+      } else {
+        this.selectCamera = this.camera
+        this.camera.helper.visible = false
+        this.grid.visible = false
+        this.axis.visible = false
+      }
+    } else if (!this.keyboard.isPressC()) {
+      this.prevPressC = false
+    }
+
     if (!(this.keyboard.isPressA() || this.keyboard.isPressD() || this.keyboard.isPressW() || this.keyboard.isPressS())) {
       this.model.stop()
     // A
     } else if (this.keyboard.isPressA()) {
-      this.model.move(this.controlCamera, Math.PI/2)
+      this.model.move(this.selectCamera, Math.PI/2)
     // D
     } else if (this.keyboard.isPressD()) {
-      this.model.move(this.controlCamera, -Math.PI/2)
+      this.model.move(this.selectCamera, -Math.PI/2)
     // W
     } else if (this.keyboard.isPressW()) {
-      this.model.move(this.controlCamera, 0)
+      this.model.move(this.selectCamera, 0)
     // S
     } else if (this.keyboard.isPressS()) {
-      this.model.move(this.controlCamera, Math.PI)
+      this.model.move(this.selectCamera, Math.PI)
     }
     if (this.clicked) {
       const dir = new Vec3(this.clickPos.x - this.model.position.x, 0, this.clickPos.z - this.model.position.z)
@@ -382,7 +404,7 @@ export default class Game {
     this.controlCamera.controls.update()
     this.renderer.setClearColor(0x000000, 0)
     this.renderer.clear(true, true, true)
-    this.renderer.render(this.scene, this.controlCamera)
+    this.renderer.render(this.scene, this.selectCamera)
     this.renderer.clearDepth()
     this.renderer.render(this.sceneOrtho, this.cameraOrtho)
   }
