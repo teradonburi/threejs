@@ -126,9 +126,11 @@ export default class Game {
       this.trees.push(new GLTFModel(tree, true, true))
       this.trees[i].init(treePositions[i], 0, 8)
       this.trees[i].getCenter()
-      this.physicsWorld.addBoxBody(this.trees[i], this.trees[i].boundingBox.size(), 0, true)
+      this.physicsWorld.addBoxBody(this.trees[i], this.trees[i].boundingBox.size().multiplyScalar(6), 0, true)
       this.scene.add(this.trees[i])
-      this.scene.add(this.trees[i].boxHelper)
+      // const box = new Box(this.trees[i].boundingBox.size().multiplyScalar(6))
+      // box.position.copy(this.trees[i].position)
+      // this.scene.add(box)
     }
 
     // GLTF Skin

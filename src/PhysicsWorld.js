@@ -31,12 +31,12 @@ export default class PhysicsWorld {
     this.physicsWorld.stepSimulation(deltaTime, 10)
   }
 
-  addSphereBody = (objThree, radius, mass) => {
+  addSphereBody = (objThree, radius, mass, isKinematic = false, isStatic = false) => {
     const shape = new Ammo.btSphereShape(radius)
     shape.setMargin(0.05)
 
     const transform = this.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape, isKinematic, isStatic)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
@@ -50,34 +50,34 @@ export default class PhysicsWorld {
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
-  addCylinderBody = (objThree, radius, height, mass) => {
+  addCylinderBody = (objThree, radius, height, mass, isKinematic = false, isStatic = false) => {
     const shape = new Ammo.btCylinderShape(new Ammo.btVector3(radius, height * 0.5, radius))
     shape.setMargin(0.05)
 
     const transform = this.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape, isKinematic, isStatic)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
-  addConeBody = (objThree, radius, height, mass) => {
+  addConeBody = (objThree, radius, height, mass, isKinematic = false, isStatic = false) => {
     const shape = new Ammo.btConeShape(radius, height)
     shape.setMargin(0.05)
 
     const transform = this.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape, isKinematic, isStatic)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
-  addCapsuleBody = (objThree, radius, height, mass) => {
+  addCapsuleBody = (objThree, radius, height, mass, isKinematic = false, isStatic = false) => {
     const shape = new Ammo.btCapsuleShape(radius, height * 0.5)
     shape.setMargin(0.05)
 
     const transform = this.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape, isKinematic, isStatic)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
-  addConvexBody = (objThree, vertices, mass) => {
+  addConvexBody = (objThree, vertices, mass, isKinematic = false, isStatic = false) => {
     const shape = new Ammo.btConvexHullShape()
     for (let  i = 0; i < vertices.length; i++) {
       const vec = vertices[i]
@@ -85,11 +85,11 @@ export default class PhysicsWorld {
     }
 
     const transform = this.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape, isKinematic, isStatic)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
-  addTriangleBody = (objThree, vertices, faces, mass) => {
+  addTriangleBody = (objThree, vertices, faces, mass, isKinematic = false, isStatic = false) => {
     const triangle_mesh = new Ammo.btTriangleMesh()
     const triangles = []
     for (let i = 0; i < faces.length; i++) {
@@ -135,7 +135,7 @@ export default class PhysicsWorld {
     )
 
     const transform = this.createTransform(objThree.position, objThree.quaternion)
-    objThree.userData.physicsBody = this.createBody(mass, transform, shape)
+    objThree.userData.physicsBody = this.createBody(mass, transform, shape, isKinematic, isStatic)
     this.physicsWorld.addRigidBody(objThree.userData.physicsBody)
   }
 
