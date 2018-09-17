@@ -140,9 +140,9 @@ export default class PhysicsWorld {
   }
 
   addHeightMapBody = (objThree) => {
-		// Creates height data buffer in Ammo heap
+		// Ammo heapに高さデータのバッファを作成する
     const ammoHeightData = Ammo._malloc(4 * objThree.terrainWidth * objThree.terrainDepth)
-		// Copy the javascript height data array to the Ammo one.
+    // Ammoのバッファにデータをコピー
     let p = 0
     let p2 = 0
     for (let j = 0; j < objThree.terrainDepth; j++) {
@@ -154,17 +154,16 @@ export default class PhysicsWorld {
         p2 += 4
       }
     }
-		// Creates the heightfield physics shape
     const heightFieldShape = new Ammo.btHeightfieldTerrainShape(
-      objThree.terrainWidth,
-      objThree.terrainDepth,
-      ammoHeightData,
-      1,
-      objThree.terrainMinHeight,
-      objThree.terrainMaxHeight,
-      1,
-      'PHY_FLOAT',
-      false
+      objThree.terrainWidth, // 横幅
+      objThree.terrainDepth, // 縦幅
+      ammoHeightData, // 高さデータ
+      1, // 高さのスケール
+      objThree.terrainMinHeight, // AABB判定に使用される高さの最小
+      objThree.terrainMaxHeight, // AABB判定に使用される高さの最大
+      1, // 上方向の軸番号(Y軸:1)
+      'PHY_FLOAT', // データタイプの指定
+      false // 三角形化の際のエッジ反転
     )
 		// Set horizontal scale
     const scaleX = objThree.terrainGeometoryWidth / (objThree.terrainWidth - 1)
@@ -172,7 +171,6 @@ export default class PhysicsWorld {
     heightFieldShape.setLocalScaling(new Ammo.btVector3(scaleX, 1, scaleZ))
     heightFieldShape.setMargin(0.05)
 
-		// Create the terrain body
     const groundTransform = new Ammo.btTransform()
     groundTransform.setIdentity()
 		// Shifts the terrain, since bullet re-centers it on its bounding box.
