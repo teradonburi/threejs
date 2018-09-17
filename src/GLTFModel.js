@@ -2,14 +2,13 @@
 
 export default class GLTFModel {
   constructor (gltfOriginal, traverse = false, clone = false) {
-    const gltf = clone ? this.cloneGltf(gltfOriginal) : gltfOriginal
-    this.object = gltf.scene
-    const animations = gltf.animations
+    this.object = clone ? gltfOriginal.scene.clone(true) : gltfOriginal.scene
+    const animations = gltfOriginal.animations.slice(0) // deep copy
     if (animations && animations.length) {
       this.object.mixer = new THREE.AnimationMixer(this.object)
       this.object.actions = []
       for (let i = 0; i < animations.length; i ++) {
-        const animation = animations[ i ]
+        const animation = animations[i]
         this.object.actions.push(this.object.mixer.clipAction(animation))
       }
     }
@@ -144,53 +143,6 @@ export default class GLTFModel {
       }
     }
     return {vertices, faces, boundingBox, boundingSphere}
-  }
-
-  cloneGltf = (gltf) => {
-    const clone = {
-      animations: gltf.animations,
-      scene: gltf.scene.clone(true),
-    }
-
-    const skinnedMeshes = {}
-
-    gltf.scene.traverse(node => {
-      if (node.isSkinnedMesh) {
-        skinnedMeshes[node.name] = node
-      }
-    })
-
-    const cloneBones = {}
-    const cloneSkinnedMeshes = {}
-
-    clone.scene.traverse(node => {
-      if (node.isBone) {
-        cloneBones[node.name] = node
-      }
-
-      if (node.isSkinnedMesh) {
-        cloneSkinnedMeshes[node.name] = node
-      }
-    })
-
-    for (let name in skinnedMeshes) {
-      const skinnedMesh = skinnedMeshes[name]
-      const skeleton = skinnedMesh.skeleton
-      const cloneSkinnedMesh = cloneSkinnedMeshes[name]
-
-      const orderedCloneBones = []
-
-      for (let i = 0; i < skeleton.bones.length; ++i) {
-        const cloneBone = cloneBones[skeleton.bones[i].name]
-        orderedCloneBones.push(cloneBone)
-      }
-
-      cloneSkinnedMesh.bind(
-        new THREE.Skeleton(orderedCloneBones, skeleton.boneInverses),
-        cloneSkinnedMesh.matrixWorld)
-    }
-
-    return clone
   }
 
 }

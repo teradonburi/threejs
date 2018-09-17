@@ -63,20 +63,20 @@ export default class Game {
     this.sound.setVolume(10)
 
     // 3Dカメラ
-    const eye = new Vec3(50, 50, 150)
+    const eye = new Vec3(0, 50, -150)
     const lookAt = new Vec3(0, 0, 0)
     this.camera = new Camera3D(eye, lookAt)
     this.scene.add(this.camera)
     this.scene.add(this.camera.getHelper()) // helper
-
-    // 2Dカメラ
-    this.cameraOrtho = new Camera2D()
 
     // コントロールカメラ
     const debugEye = new Vec3(100, 200, 200)
     const debugLookAt = new Vec3(0, 0, 0)
     this.controlCamera = new Camera3D(debugEye, debugLookAt, 1, 4000)
     this.controlCamera.controls = this.controlCamera.getControls()
+
+    // 2Dカメラ
+    this.cameraOrtho = new Camera2D()
 
     // lighting
     this.light = new DirectionalLight()
@@ -274,9 +274,18 @@ export default class Game {
 
   render = (frame) => {
     const {delta, time} = this.clock.update()
-    TWEEN.update(frame)
-    this.model.mixer && this.model.mixer.update(delta)
+    this.camera.lookAt(new Vec3(this.model.position.x, this.model.position.y + 10, this.model.position.z))
+    const cameraDir = new Vec3(this.model.position.x - this.camera.position.x, 0, this.model.position.z - this.camera.position.z)
+    const cameraDistance = 100
+    if (cameraDir.length() > cameraDistance) {
+      const target = cameraDir.normalize().multiplyScalar(cameraDistance)
+      this.camera.position.copy(new Vec3(this.model.position.x - target.x, this.camera.position.y, this.model.position.z - target.z))
+    }
 
+    TWEEN.update(frame) // TWEENオブジェクト更新
+    this.model.mixer && this.model.mixer.update(delta) // モデルアニメーション更新
+
+    // 動的にオブジェクトを生成する
     if (this.dynamicObjects.length < 5 && time > this.timeNextSpawn) {
       const objectType = Math.ceil(Math.random() * 4)
       let mesh = null
@@ -326,15 +335,16 @@ export default class Game {
       this.model.move(this.controlCamera, Math.PI)
     }
     if (this.clicked) {
-      const dir = new Vec3(this.clickPos.x - this.model.position.x, this.clickPos.y - this.model.position.y, this.clickPos.z - this.model.position.z)
+      const dir = new Vec3(this.clickPos.x - this.model.position.x, 0, this.clickPos.z - this.model.position.z)
       if (dir.length() < 3) {
         this.clicked = false
       }
       this.model.moveTo(this.clickPos)
     }
+    // 移動結果を物理計算空間に反映
     this.physicsWorld.setPhysicsPose(this.model)
 
-    const delay = 1
+    const delay = 3
     if (this.isGround && time > (this.jumbTime || 0) + delay && this.keyboard.isPressSpace()) {
       this.physicsWorld.addImpulse(this.model, new Vec3(0, 8000, 0))
       this.sound.play()
@@ -355,7 +365,7 @@ export default class Game {
     }
 
     for (let i = 0; i < this.dynamicObjects.length; i++) {
-      const objThree = this.dynamicObjects[ i ]
+      const objThree = this.dynamicObjects[i]
       // ドラッグしていないオブジェクト以外反映する
       if (objThree.userData && objThree.userData.ignorePhysics) {
         continue
