@@ -93,7 +93,7 @@ export default class Game {
     this.light.position.z = parameters.distance * Math.sin(phi) * Math.cos(theta)
     this.scene.add(this.light)
     this.ambient = new AmbientLight()
-    // this.scene.add(this.ambient)
+    this.scene.add(this.ambient)
 
     // Sky
     this.sky = new Sky()
