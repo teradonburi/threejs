@@ -211,7 +211,7 @@ export default class Game {
     this.objectTimePeriod = 3
     this.timeNextSpawn = this.objectTimePeriod
 
-    this.loop()
+    requestAnimationFrame(this.loop)
   }
 
   onDragStart = (e) => {
