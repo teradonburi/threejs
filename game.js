@@ -51,17 +51,6 @@ export default class Game {
     // RayCaster
     this.rayCaster = new RayCaster()
 
-    // Audio
-    this.audioListener = new AudioListener()
-    this.buffer = await this.loader.loadAudio('./sounds/bgm_maoudamashii_healing13.mp3')
-    this.bgm = new Audio(this.buffer, this.audioListener)
-    this.bgm.setLoop(true)
-    this.bgm.setVolume(0.1)
-    this.bgm.play()
-    this.soundBuffer = await this.loader.loadAudio('./sounds/ping_pong.mp3')
-    this.sound = new PositionalAudio(this.soundBuffer, this.audioListener)
-    this.sound.setVolume(10)
-
     // 3Dカメラ
     const eye = new Vec3(0, 50, -150)
     const lookAt = new Vec3(0, 0, 0)
@@ -80,6 +69,18 @@ export default class Game {
 
     // 2Dカメラ
     this.cameraOrtho = new Camera2D()
+
+    // Audio
+    this.audioListener = new AudioListener()
+    this.buffer = await this.loader.loadAudio('./sounds/bgm_maoudamashii_healing13.mp3')
+    this.bgm = new Audio(this.buffer, this.audioListener)
+    this.bgm.setLoop(true)
+    this.bgm.setVolume(0.1)
+    this.bgm.play()
+    this.soundBuffer = await this.loader.loadAudio('./sounds/ping_pong.mp3')
+    this.selectCamera.add(this.audioListener)
+    this.sound = new PositionalAudio(this.soundBuffer, this.audioListener)
+    this.sound.setVolume(10)
 
     // lighting
     this.light = new DirectionalLight()
@@ -329,15 +330,19 @@ export default class Game {
       this.isDebug = !this.isDebug
       this.prevPressC = true
       if (this.isDebug) {
+        this.selectCamera.remove(this.audioListener)
         this.selectCamera = this.controlCamera
         this.camera.helper.visible = true
         this.grid.visible = true
         this.axis.visible = true
+        this.selectCamera.add(this.audioListener)
       } else {
+        this.selectCamera.remove(this.audioListener)
         this.selectCamera = this.camera
         this.camera.helper.visible = false
         this.grid.visible = false
         this.axis.visible = false
+        this.selectCamera.add(this.audioListener)
       }
     } else if (!this.keyboard.isPressC()) {
       this.prevPressC = false

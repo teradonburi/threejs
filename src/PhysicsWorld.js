@@ -273,7 +273,6 @@ export default class PhysicsWorld {
     for (let key in targets) {
       const target = targets[key]
       if (!target.userData.physicsBody) continue
-      delete target.userData.hits
       targetPtrs[target.userData.physicsBody.ptr] = {}
     }
 
