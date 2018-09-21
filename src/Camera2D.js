@@ -12,11 +12,11 @@ export default class Camera2D {
 
   resize = () => {
     // カメラのアスペクト比を正す
-    const width = window.innerWidth
-    const height = window.innerHeight
-    this.camera = new THREE.OrthographicCamera(-width/2, width/2, height/2, -height/2, 1, 10)
-    this.camera.position.z = 10
-    this.camera.resize = this.resize
+    this.camera.left = window.innerWidth / -2
+    this.camera.right = window.innerWidth / 2
+    this.camera.top = window.innerHeight / 2
+    this.camera.bottom = window.innerHeight / -2
+    this.camera.updateProjectionMatrix()
   }
 
 }
