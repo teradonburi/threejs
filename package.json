@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "webpack --watch -d & browser-sync start -s -f '.' --ignore 'node_modules' 'yarn.lock'",
-    "lint": "eslint *.js"
+    "lint": "eslint *.js",
+    "start": "serve ."
   },
   "dependencies": {
     "@tweenjs/tween.js": "^17.2.0",
@@ -13,7 +14,8 @@
     "mongoose": "^5.2.0",
     "node-dev": "^3.1.3",
     "npm-run-all": "^4.1.3",
-    "three": "^0.95.0"
+    "three": "^0.95.0",
+    "serve": "^10.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.55",
@@ -27,5 +29,9 @@
     "imports-loader": "^0.8.0",
     "webpack": "^4.16.3",
     "webpack-cli": "^3.1.0"
+  },
+  "engines": {
+    "node": "8.11.3",
+    "yarn": "^1.9.4"
   }
 }
